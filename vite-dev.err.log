@@ -1,0 +1,151 @@
+[2m11:44:38 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: D:\frontend to backend\e-mart dashboard\src\components\product-dialog.jsx: Unexpected token (27:4)
+
+[0m [90m 25 |[31m     [36masync[31m [36mfunction[31m getData(){
+ [90m 26 |[31m       [36mlet[31m res [33m=[31m [36mawait[31m 
+[31m[1m>[22m[31m[90m 27 |[31m     }
+ [90m    |[31m     [31m[1m^[22m[31m
+ [90m 28 |[31m     setForm(product [33m||[31m emptyProduct)[33m;[31m
+ [90m 29 |[31m   }[33m,[31m [product[33m,[31m open])[33m;[31m
+ [90m 30 |[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mD:/frontend to backend/e-mart dashboard/src/components/product-dialog.jsx[39m:27:4
+[33m  25 |      async function getData(){
+  26 |        let res = await 
+  27 |      }
+     |      ^
+  28 |      setForm(product || emptyProduct);
+  29 |    }, [product, open]);[39m
+      at constructor (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:369:19)
+      at JSXParserMixin.raise (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:6620:19)
+      at JSXParserMixin.unexpected (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:6640:16)
+      at JSXParserMixin.parseExprAtom (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:11468:22)
+      at JSXParserMixin.parseExprAtom (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:4780:20)
+      at JSXParserMixin.parseExprSubscripts (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:11102:23)
+      at JSXParserMixin.parseUpdate (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:11087:21)
+      at JSXParserMixin.parseMaybeUnary (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:11067:23)
+      at JSXParserMixin.parseAwait (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:12307:28)
+      at JSXParserMixin.parseMaybeUnary (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:11036:25)
+      at JSXParserMixin.parseMaybeUnaryOrPrivate (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:10920:61)
+      at JSXParserMixin.parseExprOps (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:10925:23)
+      at JSXParserMixin.parseMaybeConditional (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:10902:23)
+      at JSXParserMixin.parseMaybeAssign (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:10852:21)
+      at D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:10821:39
+      at JSXParserMixin.allowInAnd (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:12450:16)
+      at JSXParserMixin.parseMaybeAssignAllowIn (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:10821:17)
+      at JSXParserMixin.parseVar (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:13413:91)
+      at JSXParserMixin.parseVarStatement (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:13259:10)
+      at JSXParserMixin.parseStatementContent (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:12880:23)
+      at JSXParserMixin.parseStatementLike (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:12796:17)
+      at JSXParserMixin.parseStatementListItem (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:12776:17)
+      at JSXParserMixin.parseBlockOrModuleBlockBody (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:13345:61)
+      at JSXParserMixin.parseBlockBody (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:13338:10)
+      at JSXParserMixin.parseBlock (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:13326:10)
+      at JSXParserMixin.parseFunctionBody (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:12129:24)
+      at JSXParserMixin.parseFunctionBodyAndFinish (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:12115:10)
+      at D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:13474:12
+      at JSXParserMixin.withSmartMixTopicForbiddingContext (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:12432:14)
+      at JSXParserMixin.parseFunction (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:13473:10)
+      at JSXParserMixin.parseFunctionStatement (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:13154:17)
+      at JSXParserMixin.parseStatementContent (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:12919:25)
+      at JSXParserMixin.parseStatementLike (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:12796:17)
+      at JSXParserMixin.parseStatementListItem (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:12776:17)
+      at JSXParserMixin.parseBlockOrModuleBlockBody (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:13345:61)
+      at JSXParserMixin.parseBlockBody (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:13338:10)
+      at JSXParserMixin.parseBlock (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:13326:10)
+      at JSXParserMixin.parseFunctionBody (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:12129:24)
+      at JSXParserMixin.parseArrowExpression (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:12104:10)
+      at JSXParserMixin.parseParenAndDistinguishExpression (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:11713:12)
+      at JSXParserMixin.parseExprAtom (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:11357:23)
+      at JSXParserMixin.parseExprAtom (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:4780:20)
+      at JSXParserMixin.parseExprSubscripts (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:11102:23)
+      at JSXParserMixin.parseUpdate (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:11087:21)
+      at JSXParserMixin.parseMaybeUnary (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:11067:23)
+      at JSXParserMixin.parseMaybeUnaryOrPrivate (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:10920:61)
+      at JSXParserMixin.parseExprOps (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:10925:23)
+      at JSXParserMixin.parseMaybeConditional (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:10902:23)
+      at JSXParserMixin.parseMaybeAssign (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:10852:21)
+      at D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:10821:39
+[2m11:44:38 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m Pre-transform error: D:\frontend to backend\e-mart dashboard\src\components\product-dialog.jsx: Unexpected token (27:4)
+
+[0m [90m 25 |[39m     [36masync[39m [36mfunction[39m getData(){
+ [90m 26 |[39m       [36mlet[39m res [33m=[39m [36mawait[39m 
+[31m[1m>[22m[39m[90m 27 |[39m     }
+ [90m    |[39m     [31m[1m^[22m[39m
+ [90m 28 |[39m     setForm(product [33m||[39m emptyProduct)[33m;[39m
+ [90m 29 |[39m   }[33m,[39m [product[33m,[39m open])[33m;[39m
+ [90m 30 |[39m[0m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mD:/frontend to backend/e-mart dashboard/src/components/product-dialog.jsx[39m:27:4
+[33m  25 |      async function getData(){
+  26 |        let res = await 
+  27 |      }
+     |      ^
+  28 |      setForm(product || emptyProduct);
+  29 |    }, [product, open]);[39m
+[2m11:44:39 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: D:\frontend to backend\e-mart dashboard\src\components\product-dialog.jsx: Unexpected token (27:4)
+
+[0m [90m 25 |[31m     [36masync[31m [36mfunction[31m getData(){
+ [90m 26 |[31m       [36mlet[31m res [33m=[31m [36mawait[31m 
+[31m[1m>[22m[31m[90m 27 |[31m     }
+ [90m    |[31m     [31m[1m^[22m[31m
+ [90m 28 |[31m     setForm(product [33m||[31m emptyProduct)[33m;[31m
+ [90m 29 |[31m   }[33m,[31m [product[33m,[31m open])[33m;[31m
+ [90m 30 |[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mD:/frontend to backend/e-mart dashboard/src/components/product-dialog.jsx[39m:27:4
+[33m  25 |      async function getData(){
+  26 |        let res = await 
+  27 |      }
+     |      ^
+  28 |      setForm(product || emptyProduct);
+  29 |    }, [product, open]);[39m
+      at constructor (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:369:19)
+      at JSXParserMixin.raise (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:6620:19)
+      at JSXParserMixin.unexpected (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:6640:16)
+      at JSXParserMixin.parseExprAtom (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:11468:22)
+      at JSXParserMixin.parseExprAtom (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:4780:20)
+      at JSXParserMixin.parseExprSubscripts (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:11102:23)
+      at JSXParserMixin.parseUpdate (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:11087:21)
+      at JSXParserMixin.parseMaybeUnary (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:11067:23)
+      at JSXParserMixin.parseAwait (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:12307:28)
+      at JSXParserMixin.parseMaybeUnary (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:11036:25)
+      at JSXParserMixin.parseMaybeUnaryOrPrivate (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:10920:61)
+      at JSXParserMixin.parseExprOps (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:10925:23)
+      at JSXParserMixin.parseMaybeConditional (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:10902:23)
+      at JSXParserMixin.parseMaybeAssign (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:10852:21)
+      at D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:10821:39
+      at JSXParserMixin.allowInAnd (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:12450:16)
+      at JSXParserMixin.parseMaybeAssignAllowIn (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:10821:17)
+      at JSXParserMixin.parseVar (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:13413:91)
+      at JSXParserMixin.parseVarStatement (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:13259:10)
+      at JSXParserMixin.parseStatementContent (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:12880:23)
+      at JSXParserMixin.parseStatementLike (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:12796:17)
+      at JSXParserMixin.parseStatementListItem (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:12776:17)
+      at JSXParserMixin.parseBlockOrModuleBlockBody (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:13345:61)
+      at JSXParserMixin.parseBlockBody (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:13338:10)
+      at JSXParserMixin.parseBlock (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:13326:10)
+      at JSXParserMixin.parseFunctionBody (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:12129:24)
+      at JSXParserMixin.parseFunctionBodyAndFinish (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:12115:10)
+      at D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:13474:12
+      at JSXParserMixin.withSmartMixTopicForbiddingContext (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:12432:14)
+      at JSXParserMixin.parseFunction (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:13473:10)
+      at JSXParserMixin.parseFunctionStatement (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:13154:17)
+      at JSXParserMixin.parseStatementContent (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:12919:25)
+      at JSXParserMixin.parseStatementLike (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:12796:17)
+      at JSXParserMixin.parseStatementListItem (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:12776:17)
+      at JSXParserMixin.parseBlockOrModuleBlockBody (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:13345:61)
+      at JSXParserMixin.parseBlockBody (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:13338:10)
+      at JSXParserMixin.parseBlock (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:13326:10)
+      at JSXParserMixin.parseFunctionBody (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:12129:24)
+      at JSXParserMixin.parseArrowExpression (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:12104:10)
+      at JSXParserMixin.parseParenAndDistinguishExpression (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:11713:12)
+      at JSXParserMixin.parseExprAtom (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:11357:23)
+      at JSXParserMixin.parseExprAtom (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:4780:20)
+      at JSXParserMixin.parseExprSubscripts (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:11102:23)
+      at JSXParserMixin.parseUpdate (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:11087:21)
+      at JSXParserMixin.parseMaybeUnary (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:11067:23)
+      at JSXParserMixin.parseMaybeUnaryOrPrivate (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:10920:61)
+      at JSXParserMixin.parseExprOps (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:10925:23)
+      at JSXParserMixin.parseMaybeConditional (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:10902:23)
+      at JSXParserMixin.parseMaybeAssign (D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:10852:21)
+      at D:\frontend to backend\e-mart dashboard\node_modules\@babel\parser\lib\index.js:10821:39
