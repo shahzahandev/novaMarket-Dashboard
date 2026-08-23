@@ -85,7 +85,7 @@ export function AdminLayout({ activePage, setActivePage, children }) {
               <Menu className="h-5 w-5" />
             </Button>
             <div>
-              <h1 className="text-lg font-bold">E-Earbuds Admin</h1>
+              <h1 className="text-lg font-bold">Nova-Market Admin</h1>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -98,7 +98,7 @@ export function AdminLayout({ activePage, setActivePage, children }) {
               </div>
               <div>
                 <p className="text-sm font-semibold">Store Admin</p>
-                <p className="text-xs text-muted-foreground">admin@e-earbuds.com</p>
+                <p className="text-xs text-muted-foreground">admin@nmova-market.com</p>
               </div>
             </div>
           </div>

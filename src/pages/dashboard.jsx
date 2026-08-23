@@ -15,8 +15,8 @@ import { formatCurrency } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const API_BASE = "https://emart-singlevendor-backend-6.onrender.com/api/v1";
-const ALL_USERS_URL = `${API_BASE}/user/allUser`;
+const API_BASE = "http://localhost:3000/api/v1";
+const ALL_USERS_URL = `${API_BASE}/user/allUsers`;
 const ALL_PRODUCTS_URL = `${API_BASE}/product/allProduct`;
 const ALL_ORDER_URL = `${API_BASE}/order/allOrder`;
 
@@ -36,7 +36,7 @@ export function DashboardPage({ products, users, orders, chartData, activity }) 
   useEffect(() => {
     async function fetchUsers() {
       let data = await axios.get(ALL_USERS_URL);
-      setUserList(data.data.users);
+      setUserList(data.data.userData);
     }
     fetchUsers()
   }, []);
@@ -45,7 +45,7 @@ export function DashboardPage({ products, users, orders, chartData, activity }) 
   useEffect(() => {
     async function fetchUsers() {
       let data = await axios.get(ALL_PRODUCTS_URL);
-      setProductList(data.data.products);
+      setProductList(data.data.allProduct);
     }
     fetchUsers()
   }, []);
@@ -63,7 +63,7 @@ export function DashboardPage({ products, users, orders, chartData, activity }) 
     <div className="space-y-6">
       <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase text-primary">E-Earbuds control room</p>
+          <p className="text-sm font-semibold uppercase text-primary">Nova-Market control room</p>
           <h2 className="mt-1 text-3xl font-bold tracking-normal">Dashboard</h2>
           <p className="mt-2 text-muted-foreground">Products, customers, orders, revenue and inventory at a glance.</p>
         </div>
