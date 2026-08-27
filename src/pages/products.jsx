@@ -1475,12 +1475,8 @@ export function ProductsPage({
                             {product.image ? (
 
                               <img
-                                src={
-                                  product.image
-                                }
-                                alt={
-                                  product.title
-                                }
+                                src={ product.image }
+                                alt={ product.title }
                                 className="h-12 w-12 rounded-md object-cover"
                               />
 
@@ -1520,11 +1516,14 @@ export function ProductsPage({
 
                         {/* SKU */}
 
-                        <TableCell>
-                          {
+                        <TableCell cla>
+                          <div className="text-[10px]">
+   {
                             product.sku ||
                             "-"
                           }
+                          </div>
+                       
                         </TableCell>
 
                         {/* Main Price */}
@@ -1603,13 +1602,13 @@ export function ProductsPage({
 
                           {isDiscountActive ? (
 
-                            <div className="flex flex-col gap-1">
+                            <div className="flex flex-col gap-.5">
 
-                              <span className="font-semibold text-green-600">
+                              <span className="text-[12px] font-semibold text-green-600">
 
                                 {product.discountType ===
                                 "flat"
-                                  ? `Flat - ${product.discountValue}`
+                                  ? `Flat-${product.discountValue}`
                                   : product.discountType ===
                                     "percentage"
                                   ? `${product.discountValue}% Discount`
@@ -1617,7 +1616,7 @@ export function ProductsPage({
 
                               </span>
 
-                              <span className="text-xs text-green-600">
+                              <span className="text-[10px] text-green-600">
                                 Active
                               </span>
 
