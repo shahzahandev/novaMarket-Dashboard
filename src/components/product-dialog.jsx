@@ -13,7 +13,7 @@ import { Input, Select, Textarea } from "@/components/ui/input";
 import { calculateDiscountPrice } from "@/lib/discount";
 
 const MAX_IMAGES = 5;
-const API_ORIGIN = "http://localhost:3000";
+const API_ORIGIN = "https://nova-market-dashboard.vercel.app";
 
 const emptyProduct = {
   title: "",
