@@ -15,7 +15,7 @@ import { formatCurrency } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const API_BASE = "http://localhost:3000/api/v1";
+const API_BASE = "https://nova-market-backend-2.onrender.com/api/v1";
 const ALL_USERS_URL = `${API_BASE}/user/allUsers`;
 const ALL_PRODUCTS_URL = `${API_BASE}/product/allProduct`;
 const ALL_ORDER_URL = `${API_BASE}/order/allOrder`;

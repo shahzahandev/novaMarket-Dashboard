@@ -10,7 +10,7 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import { CheckCircle2, Clock, PackageCheck, Truck } from "lucide-react";
 import axios from "axios";
 
-const API_BASE = "http://localhost:3000/api/v1";
+const API_BASE = "https://nova-market-backend-2.onrender.com/api/v1";
 const ALL_ORDER_URL = `${API_BASE}/order/allOrder`;
 
 const orderStatuses = ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"];

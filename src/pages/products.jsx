@@ -30,7 +30,7 @@ import { formatCurrency } from "@/lib/utils";
 // API
 // =====================================================
 
-const API_ORIGIN = "http://localhost:3000";
+const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
 
 const API_BASE = `${API_ORIGIN}/api/v1`;
 
