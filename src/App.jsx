@@ -7,9 +7,11 @@ import { ProductsPage } from "@/pages/products";
 import { ReportsPage } from "@/pages/reports";
 import { SettingsPage } from "@/pages/settings";
 import { UsersPage } from "@/pages/users";
+import { BannerPage } from "@/pages/banner";
 
 const pageTitles = {
   dashboard: "Dashboard",
+  banner: "Banner",           // ⬅ notun line
   products: "Products",
   users: "Users",
   orders: "Orders",
@@ -26,7 +28,7 @@ export default function App() {
   const [activity, setActivity] = useState(activitySeed);
 
   useEffect(() => {
-    document.title = `E-Earbuds | ${pageTitles[activePage]}`;
+    document.title = `Nova Market ${pageTitles[activePage]}`;
   }, [activePage]);
 
   useEffect(() => {
@@ -65,6 +67,9 @@ export default function App() {
     if (activePage === "products") {
       return <ProductsPage products={products} setProducts={setProducts} />;
     }
+   if (activePage === "banner") {          // ⬅ notun block
+    return <BannerPage />;
+  }
     if (activePage === "users") {
       return <UsersPage users={users} setUsers={setUsers} orders={orders} />;
     }

@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { id: "banner", label: "banner", icon: Package },
   { id: "products", label: "Products", icon: Package },
   { id: "users", label: "Users", icon: Users },
   { id: "orders", label: "Orders", icon: ShoppingBag },
