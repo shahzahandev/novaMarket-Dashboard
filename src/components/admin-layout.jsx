@@ -117,7 +117,7 @@ function Brand() {
         <Headphones className="h-5 w-5" />
       </div>
       <div>
-        <p className="text-lg font-bold">E-Earbuds</p>
+        <p className="text-lg font-bold">Nova Market</p>
         <p className="text-xs text-muted-foreground">Admin control panel</p>
       </div>
     </div>
