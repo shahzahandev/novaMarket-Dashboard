@@ -316,7 +316,7 @@ export function UsersPage({ users, setUsers, orders }) {
                   <Detail icon={Mail} text={selected.email} />
                   <Detail icon={Phone} text={selected.phone} />
                   <Detail icon={MapPin} text={selected.address} />
-                  <Detail icon={UserCheck} text={`Joined ${formatDate(selected.joined)}`} />
+                  <Detail icon={UserCheck} text={`Joined ${formatDate(selected.createdAt)}`} />
                 </div>
                 <div className="rounded-md border p-3">
                   <p className="font-semibold">Order history</p>
