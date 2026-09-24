@@ -36,8 +36,14 @@ import {
 
 const MAX_IMAGES = 5;
 
-const API_ORIGIN =
-  "https://nova-market-backend-2.onrender.com";
+const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
+
+const SECTION_OPTIONS = [
+  "none",
+  "new",
+  "deals",
+  "feature",
+];
 
 const emptyProduct = {
   title: "",
@@ -51,6 +57,7 @@ const emptyProduct = {
   tag: "",
   features: "",
   status: "",
+  section: "",
   additionalInfo: "",
   discountType: "none",
   discountValue: "",
@@ -60,26 +67,17 @@ const emptyProduct = {
   existingImages: [],
 };
 
-// ===========================================
 // DATE
-// ===========================================
-
 function toDateInputValue(value) {
   if (!value) return "";
-
   const date = new Date(value);
-
   if (Number.isNaN(date.getTime())) {
     return "";
   }
-
   return date.toISOString().slice(0, 10);
 }
 
-// ===========================================
 // IMAGE URL
-// ===========================================
-
 function imageSrc(image) {
   if (!image) return "";
 
@@ -99,10 +97,7 @@ function imageSrc(image) {
     : `${API_ORIGIN}${url}`;
 }
 
-// ===========================================
 // DISCOUNT TYPE
-// ===========================================
-
 function normalizeDiscountType(type) {
   const value = String(
     type || "none"
@@ -117,10 +112,18 @@ function normalizeDiscountType(type) {
     : "none";
 }
 
-// ===========================================
-// DISCOUNT VALUE
-// ===========================================
+// SECTION
+function normalizeSection(section) {
+  const value = String(
+    section || "none"
+  ).toLowerCase();
 
+  return SECTION_OPTIONS.includes(value)
+    ? value
+    : "none";
+}
+
+// DISCOUNT VALUE
 function getDiscountValue(product) {
   const type =
     normalizeDiscountType(
@@ -182,10 +185,7 @@ function getDiscountValue(product) {
   return "";
 }
 
-// ===========================================
 // PRODUCT DIALOG
-// ===========================================
-
 export function ProductDialog({
   open,
   product,
@@ -353,6 +353,12 @@ export function ProductDialog({
           ?.toLowerCase?.() ||
         "",
 
+      // Section (default: none)
+      section: normalizeSection(
+        product?.raw?.section ||
+          product?.section
+      ),
+
       discountType,
 
       discountValue:
@@ -454,18 +460,12 @@ export function ProductDialog({
     return null;
   }
 
-  // =========================================
   // TOTAL IMAGE
-  // =========================================
-
   const totalImageCount =
     existingImages.length +
     newImages.length;
 
-  // =========================================
   // UPDATE FORM
-  // =========================================
-
   const update = (
     key,
     value
@@ -476,10 +476,7 @@ export function ProductDialog({
     }));
   };
 
-  // =========================================
   // CATEGORY HELPERS
-  // =========================================
-
   const normalizedCategoryInput =
     String(form.category || "")
       .trim()
@@ -520,10 +517,7 @@ export function ProductDialog({
       }
     );
 
-  // =========================================
   // CREATE CATEGORY
-  // =========================================
-
   const createNewCategory =
     async () => {
       const categoryName =
@@ -672,10 +666,7 @@ export function ProductDialog({
       }
     };
 
-  // =========================================
   // SPECIFICATION
-  // =========================================
-
   const updateSpec = (
     index,
     field,
@@ -720,10 +711,7 @@ export function ProductDialog({
     );
   };
 
-  // =========================================
   // ADD IMAGES
-  // =========================================
-
   const addImages = (
     event
   ) => {
@@ -807,10 +795,7 @@ export function ProductDialog({
     event.target.value = "";
   };
 
-  // =========================================
   // REMOVE EXISTING IMAGE
-  // =========================================
-
   const removeExistingImage =
     (index) => {
       const removed =
@@ -857,10 +842,7 @@ export function ProductDialog({
       );
     };
 
-  // =========================================
   // REMOVE NEW IMAGE
-  // =========================================
-
   const removeNewImage =
     (index) => {
       const removedKey =
@@ -939,21 +921,13 @@ export function ProductDialog({
       );
     };
 
-  // =========================================
   // SUBMIT
-  // =========================================
-
   const submit = (
     event
   ) => {
     event.preventDefault();
 
     setFormError("");
-
-    // ---------------------------------------
-    // Required
-    // ---------------------------------------
-
     if (
       !form.title ||
       !form.price ||
@@ -973,11 +947,7 @@ export function ProductDialog({
 
       return;
     }
-
-    // ---------------------------------------
     // Discount dates
-    // ---------------------------------------
-
     if (
       form.discountType !==
         "none" &&
@@ -993,10 +963,7 @@ export function ProductDialog({
       return;
     }
 
-    // ---------------------------------------
     // Flat discount
-    // ---------------------------------------
-
     if (
       form.discountType ===
         "flat" &&
@@ -1011,10 +978,7 @@ export function ProductDialog({
       return;
     }
 
-    // ---------------------------------------
     // Percentage
-    // ---------------------------------------
-
     if (
       form.discountType ===
         "percentage" &&
@@ -1029,10 +993,7 @@ export function ProductDialog({
       return;
     }
 
-    // ---------------------------------------
     // Specifications
-    // ---------------------------------------
-
     const cleanSpecs =
       specifications
         .map((s) => ({
@@ -1047,10 +1008,7 @@ export function ProductDialog({
             s.value
         );
 
-    // ---------------------------------------
     // Features
-    // ---------------------------------------
-
     const cleanFeatures =
       form.features
         ? form.features
@@ -1062,10 +1020,7 @@ export function ProductDialog({
             .filter(Boolean)
         : [];
 
-    // =======================================
     // MAIN IMAGE INDEX
-    // =======================================
-
     let mainIndex = -1;
 
     if (
@@ -1080,45 +1035,9 @@ export function ProductDialog({
       );
     }
 
-    // =======================================
-    // DEBUG
-    // =======================================
-
-    console.log(
-      "========== PRODUCT SUBMIT =========="
-    );
-
-    console.log(
-      "mainKey:",
-      mainKey
-    );
-
-    console.log(
-      "mainIndex:",
-      mainIndex
-    );
-
-    console.log(
-      "newImages:",
-      newImages
-    );
-
-    console.log(
-      "existingImages:",
-      existingImages
-    );
-
-    console.log(
-      "====================================="
-    );
-
-    // =======================================
     // SAVE
-    // =======================================
-
     onSave({
       ...form,
-
       id:
         form.id ||
         `prd-${Date.now()}`,
@@ -1128,6 +1047,12 @@ export function ProductDialog({
 
       stock:
         Number(form.stock || 0),
+
+      // Section (none | new | deals | feature)
+      section:
+        normalizeSection(
+          form.section
+        ),
 
       discountPrice:
         salePrice,
@@ -1166,14 +1091,9 @@ export function ProductDialog({
 
       // Main image information
       mainKey,
-
       mainIndex,
     });
   };
-
-  // =========================================
-  // JSX
-  // =========================================
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/45 p-4">
@@ -1208,7 +1128,6 @@ export function ProductDialog({
           </CardHeader>
 
           <CardContent className="p-6 sm:p-8">
-
             <form
               onSubmit={submit}
               className="grid grid-cols-1 gap-5 sm:grid-cols-2"
@@ -1574,6 +1493,41 @@ export function ProductDialog({
 
                   <option value="inactive">
                     inactive
+                  </option>
+                </Select>
+              </Field>
+
+              {/* SECTION */}
+
+              <Field label="Section">
+                <Select
+                  value={
+                    form.section
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    update(
+                      "section",
+                      event.target
+                        .value
+                    )
+                  }
+                >
+                  <option value="none">
+                    none
+                  </option>
+
+                  <option value="new">
+                    new
+                  </option>
+
+                  <option value="deals">
+                    deals
+                  </option>
+
+                  <option value="feature">
+                    feature
                   </option>
                 </Select>
               </Field>
@@ -2041,10 +1995,7 @@ export function ProductDialog({
   );
 }
 
-// ===========================================
 // FIELD
-// ===========================================
-
 function Field({
   label,
   required,
@@ -2070,10 +2021,7 @@ function Field({
   );
 }
 
-// ===========================================
 // IMAGE GRID
-// ===========================================
-
 function ImageGrid({
   images,
   mainKey,

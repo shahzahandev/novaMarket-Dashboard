@@ -27,34 +27,16 @@ import {
 
 import { formatCurrency } from "@/lib/utils";
 
-// =====================================================
-// API
-// =====================================================
-
 const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
-
 const API_BASE = `${API_ORIGIN}/api/v1`;
+const ALL_PRODUCTS_URL = `${API_BASE}/product/allProduct`;
+const CREATE_PRODUCT_URL = `${API_BASE}/product/createProduct`;
+const updateProductUrl = (id) => `${API_BASE}/product/updateProduct/${id}`;
+const deleteProductUrl = (id) => `${API_BASE}/product/deleteProduct/${id}`;
 
-const ALL_PRODUCTS_URL =
-  `${API_BASE}/product/allProduct`;
-
-const CREATE_PRODUCT_URL =
-  `${API_BASE}/product/createProduct`;
-
-const updateProductUrl = (id) =>
-  `${API_BASE}/product/updateProduct/${id}`;
-
-const deleteProductUrl = (id) =>
-  `${API_BASE}/product/deleteProduct/${id}`;
-
-// =====================================================
 // Normalize Status
-// =====================================================
-
 function normalizeStatus(status, stock) {
-  const value = String(
-    status || "active"
-  ).toLowerCase();
+  const value = String(status || "active").toLowerCase();
 
   const statuses = {
     active: "Active",
@@ -66,10 +48,7 @@ function normalizeStatus(status, stock) {
     "out of stock": "Out of Stock",
   };
 
-  if (
-    value === "inactive" ||
-    value === "pending"
-  ) {
+  if (value === "inactive" || value === "pending") {
     return statuses[value];
   }
 
@@ -77,47 +56,30 @@ function normalizeStatus(status, stock) {
     return "Out of Stock";
   }
 
-  if (
-    Number(stock) > 0 &&
-    Number(stock) <= 8
-  ) {
+  if (Number(stock) > 0 && Number(stock) <= 8) {
     return "Low Stock";
   }
 
   return statuses[value] || "Active";
 }
 
-// =====================================================
 // Image From Product
-// =====================================================
-
 function imageFromProduct(product) {
-  if (
-    typeof product.image === "string" &&
-    product.image.trim()
-  ) {
+  if (typeof product.image === "string" && product.image.trim()) {
     const image = product.image.trim();
-
-    return image.startsWith("http")
-      ? image
-      : `${API_ORIGIN}${image}`;
+    return image.startsWith("http") ? image : `${API_ORIGIN}${image}`;
   }
 
-  const images = Array.isArray(product.images)
-    ? product.images
-    : [];
+  const images = Array.isArray(product.images) ? product.images : [];
 
-  const mainImage =
-    images.find(
-      (image) => image?.isMain
+  const mainImage = images.find((image) => image?.isMain
     ) || images[0];
 
-  const imageUrl =
-    typeof mainImage === "string"
-      ? mainImage
-      : mainImage?.url ||
-        mainImage?.secure_url ||
-        "";
+  const imageUrl = typeof mainImage === "string"
+    ? mainImage
+    : mainImage?.url ||
+    mainImage?.secure_url ||
+    "";
 
   if (!imageUrl) {
     return "";
@@ -128,10 +90,7 @@ function imageFromProduct(product) {
     : `${API_ORIGIN}${imageUrl}`;
 }
 
-// =====================================================
 // Normalize Discount Type
-// =====================================================
-
 function normalizeDiscountType(type) {
   const value = String(
     type || "none"
@@ -146,10 +105,7 @@ function normalizeDiscountType(type) {
     : "none";
 }
 
-// =====================================================
 // Calculate Final Discount Price
-// =====================================================
-
 function calculateFinalDiscountPrice({
   price,
   discountType,
@@ -196,10 +152,7 @@ function calculateFinalDiscountPrice({
   return productPrice;
 }
 
-// =====================================================
 // Calculate Discount Value From Final Price
-// =====================================================
-
 function calculateDiscountValueFromPrice({
   price,
   discountType,
@@ -230,17 +183,14 @@ function calculateDiscountValueFromPrice({
     return Math.round(
       ((productPrice - finalPrice) /
         productPrice) *
-        100
+      100
     );
   }
 
   return "";
 }
 
-// =====================================================
 // Normalize Product
-// =====================================================
-
 function normalizeProduct(product) {
   const stock = Number(
     product.stock ?? 0
@@ -255,10 +205,7 @@ function normalizeProduct(product) {
       product.discountType
     );
 
-  // ===================================================
   // Discount Value
-  // ===================================================
-
   let discountValue =
     product.discountValue;
 
@@ -276,10 +223,7 @@ function normalizeProduct(product) {
       });
   }
 
-  // ===================================================
   // Discount Price
-  // ===================================================
-
   let discountPrice = price;
 
   if (
@@ -297,39 +241,36 @@ function normalizeProduct(product) {
   if (
     discountType !== "none" &&
     product.discountPrice !==
-      undefined &&
+    undefined &&
     product.discountPrice !== null &&
     Number(product.discountPrice) <
-      price
+    price
   ) {
     discountPrice = Number(
       product.discountPrice
     );
   }
 
-  // ===================================================
   // Existing Images
-  // ===================================================
-
   const existingImages =
     Array.isArray(product.images)
       ? product.images.map(
-          (image, index) => ({
-            ...image,
+        (image, index) => ({
+          ...image,
 
-            _id:
-              image?._id ||
-              `existing-${index}`,
+          _id:
+            image?._id ||
+            `existing-${index}`,
 
-            url:
-              image?.url || "",
+          url:
+            image?.url || "",
 
-            isMain:
-              Boolean(
-                image?.isMain
-              ),
-          })
-        )
+          isMain:
+            Boolean(
+              image?.isMain
+            ),
+        })
+      )
       : [];
 
   const mainImage =
@@ -401,7 +342,7 @@ function normalizeProduct(product) {
 
     discountValue:
       discountValue === undefined ||
-      discountValue === null
+        discountValue === null
         ? ""
         : String(discountValue),
 
@@ -429,6 +370,8 @@ function normalizeProduct(product) {
         stock
       ),
 
+    section:
+      product.section || "none",
     // Image
     image,
 
@@ -447,10 +390,7 @@ function normalizeProduct(product) {
   };
 }
 
-// =====================================================
 // Backend Status
-// =====================================================
-
 function backendStatus(status) {
   return String(
     status || "active"
@@ -459,10 +399,7 @@ function backendStatus(status) {
     .replaceAll(" ", "_");
 }
 
-// =====================================================
 // Normalize Date
-// =====================================================
-
 function normalizeDate(dateValue) {
   if (!dateValue) {
     return null;
@@ -488,10 +425,7 @@ function normalizeDate(dateValue) {
   return date;
 }
 
-// =====================================================
 // Get Discount Status
-// =====================================================
-
 function getDiscountStatus(product) {
   const discountType =
     normalizeDiscountType(
@@ -563,10 +497,7 @@ function getDiscountStatus(product) {
   return "none";
 }
 
-// =====================================================
 // Format Discount Date
-// =====================================================
-
 function formatDiscountDate(
   dateValue
 ) {
@@ -593,20 +524,14 @@ function formatDiscountDate(
   );
 }
 
-// =====================================================
 // Build Product FormData
-// =====================================================
-
 function buildProductPayload(
   product
 ) {
   const payload =
     new FormData();
 
-  // ===================================================
   // Basic Information
-  // ===================================================
-
   payload.append(
     "title",
     product.title || ""
@@ -637,7 +562,6 @@ function buildProductPayload(
     product.stock ?? 0
   );
 
-  // Brand
   if (
     Array.isArray(
       product.brand
@@ -679,33 +603,35 @@ function buildProductPayload(
   );
 
   payload.append(
+    "section",
+    product.section
+  );
+
+  payload.append(
     "additionalInfo",
     product.additionalInfo || ""
   );
 
-  // ===================================================
   // Features
-  // ===================================================
-
   const cleanFeatures =
     Array.isArray(
       product.features
     )
       ? product.features
-          .map((feature) =>
-            String(
-              feature
-            ).trim()
-          )
-          .filter(Boolean)
-      : String(
-          product.features || ""
+        .map((feature) =>
+          String(
+            feature
+          ).trim()
         )
-          .split(",")
-          .map((feature) =>
-            feature.trim()
-          )
-          .filter(Boolean);
+        .filter(Boolean)
+      : String(
+        product.features || ""
+      )
+        .split(",")
+        .map((feature) =>
+          feature.trim()
+        )
+        .filter(Boolean);
 
   payload.append(
     "features",
@@ -714,10 +640,7 @@ function buildProductPayload(
     )
   );
 
-  // ===================================================
   // Specifications
-  // ===================================================
-
   payload.append(
     "specifications",
     JSON.stringify(
@@ -729,10 +652,7 @@ function buildProductPayload(
     )
   );
 
-  // ===================================================
   // Discount
-  // ===================================================
-
   const discountType =
     normalizeDiscountType(
       product.discountType
@@ -802,13 +722,13 @@ function buildProductPayload(
     payload.append(
       "discountStartDate",
       product.discountStartDate ||
-        ""
+      ""
     );
 
     payload.append(
       "discountEndDate",
       product.discountEndDate ||
-        ""
+      ""
     );
   }
 
@@ -826,9 +746,9 @@ function buildProductPayload(
         (image, index) => ({
           ...(image?._id
             ? {
-                _id:
-                  image._id,
-              }
+              _id:
+                image._id,
+            }
             : {}),
 
           url:
@@ -877,8 +797,8 @@ function buildProductPayload(
       "newMainIndex",
       product.mainIndex >= 0
         ? String(
-            product.mainIndex
-          )
+          product.mainIndex
+        )
         : "-1"
     );
   }
@@ -969,7 +889,7 @@ export function ProductsPage({
 
         setError(
           err.message ||
-            "Product load kora jayni."
+          "Product load kora jayni."
         );
       } finally {
         setLoading(false);
@@ -1027,7 +947,7 @@ export function ProductsPage({
           const matchesStatus =
             status === "All" ||
             product.status ===
-              status;
+            status;
 
           return (
             matchesQuery &&
@@ -1063,8 +983,8 @@ export function ProductsPage({
         const url =
           isEditing
             ? updateProductUrl(
-                product.id
-              )
+              product.id
+            )
             : CREATE_PRODUCT_URL;
 
         const response =
@@ -1129,11 +1049,11 @@ export function ProductsPage({
 
         setDialogError(
           err.message ||
-            (
-              editing
-                ? "Product update hoyni."
-                : "Product add hoyni."
-            )
+          (
+            editing
+              ? "Product update hoyni."
+              : "Product add hoyni."
+          )
         );
 
         // Dialog close হবে না
@@ -1178,7 +1098,7 @@ export function ProductsPage({
         if (!response.ok) {
           throw new Error(
             responseData?.message ||
-              "Failed to delete product"
+            "Failed to delete product"
           );
         }
 
@@ -1195,7 +1115,7 @@ export function ProductsPage({
 
         setError(
           err.message ||
-            "Product delete hoyni."
+          "Product delete hoyni."
         );
       }
     };
@@ -1500,14 +1420,12 @@ export function ProductsPage({
                         {/* Product */}
 
                         <TableCell className="min-w-[260px]">
-
                           <div className="flex items-center gap-3">
-
                             {product.image ? (
 
                               <img
-                                src={ product.image }
-                                alt={ product.title }
+                                src={product.image}
+                                alt={product.title}
                                 className="h-12 w-12 rounded-md object-cover"
                               />
 
@@ -1532,8 +1450,8 @@ export function ProductsPage({
                                     product.brand
                                   )
                                     ? product.brand.join(
-                                        ", "
-                                      )
+                                      ", "
+                                    )
                                     : product.brand}
 
                                 </p>
@@ -1549,12 +1467,12 @@ export function ProductsPage({
 
                         <TableCell cla>
                           <div className="text-[10px]">
-   {
-                            product.sku ||
-                            "-"
-                          }
+                            {
+                              product.sku ||
+                              "-"
+                            }
                           </div>
-                       
+
                         </TableCell>
 
                         {/* Main Price */}
@@ -1638,12 +1556,12 @@ export function ProductsPage({
                               <span className="text-[12px] font-semibold text-green-600">
 
                                 {product.discountType ===
-                                "flat"
+                                  "flat"
                                   ? `Flat-${product.discountValue}`
                                   : product.discountType ===
                                     "percentage"
-                                  ? `${product.discountValue}% Discount`
-                                  : "Discount"}
+                                    ? `${product.discountValue}% Discount`
+                                    : "Discount"}
 
                               </span>
 
