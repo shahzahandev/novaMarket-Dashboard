@@ -99,7 +99,7 @@ export function AdminLayout({ activePage, setActivePage, children }) {
               </div>
               <div>
                 <p className="text-sm font-semibold">Store Admin</p>
-                <p className="text-xs text-muted-foreground">admin@nmova-market.com</p>
+                <p className="text-xs text-muted-foreground">novamarket@gmails.com</p>
               </div>
             </div>
           </div>

@@ -73,7 +73,7 @@ function imageFromProduct(product) {
   const images = Array.isArray(product.images) ? product.images : [];
 
   const mainImage = images.find((image) => image?.isMain
-    ) || images[0];
+  ) || images[0];
 
   const imageUrl = typeof mainImage === "string"
     ? mainImage
@@ -1342,10 +1342,6 @@ export function ProductsPage({
                 </TableHead>
 
                 <TableHead>
-                  SKU
-                </TableHead>
-
-                <TableHead>
                   Main Price
                 </TableHead>
 
@@ -1369,6 +1365,9 @@ export function ProductsPage({
                   Stock
                 </TableHead>
 
+                <TableHead>
+                  Section
+                </TableHead>
                 <TableHead>
                   Status
                 </TableHead>
@@ -1463,17 +1462,7 @@ export function ProductsPage({
 
                         </TableCell>
 
-                        {/* SKU */}
 
-                        <TableCell cla>
-                          <div className="text-[10px]">
-                            {
-                              product.sku ||
-                              "-"
-                            }
-                          </div>
-
-                        </TableCell>
 
                         {/* Main Price */}
 
@@ -1618,6 +1607,17 @@ export function ProductsPage({
                             product.stock
                           }
                         </TableCell>
+                        {/* SKU */}
+
+                        <TableCell cla>
+                          <div className="text-sm">
+                            {
+                              product.section ||
+                              "-"
+                            }
+                          </div>
+
+                        </TableCell>
 
                         {/* Status */}
 
@@ -1683,10 +1683,7 @@ export function ProductsPage({
 
       </Card>
 
-      {/* =================================================
-          Product Dialog
-      ================================================= */}
-
+      {/* ========  Product Dialog =========== */}
       <ProductDialog
         open={dialogOpen}
         product={editing}
@@ -1699,10 +1696,7 @@ export function ProductsPage({
         error={dialogError}
       />
 
-      {/* =================================================
-          Delete Category Dialog
-      ================================================= */}
-
+      {/* ======== Delete Category Dialog ======== */}
       <CategoryDeleteDialog
         open={categoryDialogOpen}
         onClose={handleCloseCategoryDialog}

@@ -7,6 +7,9 @@ import {
   ShieldAlert,
   Trash2,
   UserCheck,
+  Heart,
+  PackageCheck,
+  Edit3,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { StatusBadge } from "@/components/status-badge";
@@ -22,6 +25,7 @@ const ALL_DELETED_USERS_URL = `${API_BASE}/user/allDeleteUser`;
 const singleUserUrl = (id) => `${API_BASE}/user/singleUser/${id}`;
 const updateUserUrl = (id) => `${API_BASE}/user/updateUser/${id}`;
 const deleteUserUrl = (id) => `${API_BASE}/user/deleteUser/${id}`;
+const singleWishlistUrl = (id) => `${API_BASE}/wishlist/singleWishlist/${id}`;
 
 function normalizeStatus(status) {
   const value = String(status || "active").toLowerCase();
@@ -61,6 +65,35 @@ function extractUsers(data) {
   return data.users || data.userData || data.deletedUsers || data.user || data.data || [];
 }
 
+function normalizeWishlistItem(item, index) {
+  const product = item.productId || item.product || item;
+  const images = Array.isArray(product?.images) ? product.images : [];
+  const mainImage = images.find((img) => img.isMain) || images[0];
+
+  return {
+    id: item._id || item.id || `wl-${index}`,
+    name: product?.title || product?.name || item.name || "Unnamed product",
+    price: Number(product?.discountPrice ?? product?.price ?? item.price ?? 0),
+    originalPrice: Number(product?.price ?? 0),
+    hasDiscount:
+      product?.discountType && product.discountType !== "none" && Number(product?.discountPrice ?? 0) < Number(product?.price ?? 0),
+    image: mainImage?.url || product?.image || item.image || "",
+    addedAt: item.createdAt || item.addedAt || "",
+  };
+}
+
+function extractWishlistItems(data) {
+  const list =
+    data.data ||
+    data.wishlist?.products ||
+    data.wishlist?.items ||
+    data.products ||
+    data.items ||
+    (Array.isArray(data.wishlist) ? data.wishlist : null) ||
+    [];
+  return Array.isArray(list) ? list : [];
+}
+
 export function UsersPage({ users, setUsers, orders }) {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
@@ -70,6 +103,8 @@ export function UsersPage({ users, setUsers, orders }) {
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [error, setError] = useState("");
   const [viewMode, setViewMode] = useState("active");
+  const [wishlist, setWishlist] = useState([]);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
 
   const fetchUsers = async (mode = viewMode) => {
     setLoading(true);
@@ -127,6 +162,33 @@ export function UsersPage({ users, setUsers, orders }) {
     fetchSingleUser();
   }, [selectedUserId, users]);
 
+  useEffect(() => {
+    async function fetchWishlist() {
+      if (!selectedUserId) {
+        setWishlist([]);
+        return;
+      }
+
+      setWishlistLoading(true);
+
+      try {
+        const response = await fetch(singleWishlistUrl(selectedUserId));
+        if (!response.ok) throw new Error("Failed to load wishlist");
+
+        const data = await response.json();
+        const items = extractWishlistItems(data);
+        setWishlist(items.map(normalizeWishlistItem));
+      } catch (err) {
+        setWishlist([]);
+        console.error(err);
+      } finally {
+        setWishlistLoading(false);
+      }
+    }
+
+    fetchWishlist();
+  }, [selectedUserId]);
+
   const filtered = useMemo(() => {
     return users.filter((user) => {
       const matchesQuery = [user.name, user.email, user.phone, user.city, user.address]
@@ -139,6 +201,8 @@ export function UsersPage({ users, setUsers, orders }) {
   }, [users, query, status]);
 
   const selected = selectedUser || users.find((user) => user.id === selectedUserId) || filtered[0];
+
+  
   const selectedOrders = selected
     ? orders.filter((order) => order.userId === selected.id || order.user === selected.id)
     : [];
@@ -206,9 +270,6 @@ export function UsersPage({ users, setUsers, orders }) {
           <Button variant={viewMode === "active" ? "default" : "outline"} onClick={() => changeMode("active")}>
             All Users
           </Button>
-          <Button variant={viewMode === "deleted" ? "default" : "outline"} onClick={() => changeMode("deleted")}>
-            Deleted Users
-          </Button>
           <Button variant="outline" onClick={() => fetchUsers()} disabled={loading}>
             <RefreshCw className="h-4 w-4" />
             {loading ? "Loading..." : "Reload API"}
@@ -242,7 +303,7 @@ export function UsersPage({ users, setUsers, orders }) {
               <Select value={status} onChange={(event) => setStatus(event.target.value)}>
                 <option>All</option>
                 <option>Active</option>
-                <option>Deleted</option>
+                <option>Inactive</option>
               </Select>
             </div>
 
@@ -253,6 +314,7 @@ export function UsersPage({ users, setUsers, orders }) {
                   <TableHead>Phone</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Is Hold</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -268,6 +330,7 @@ export function UsersPage({ users, setUsers, orders }) {
                     <TableCell>{user.phone}</TableCell>
                     <TableCell>{user.role}</TableCell>
                     <TableCell><StatusBadge status={user.status} /></TableCell>
+                    <TableCell>{user.isHold ? "Yes, Holded" : "No"}</TableCell>
                     <TableCell>
                       <div className="flex justify-end gap-2">
                         {viewMode !== "deleted" && (
@@ -278,7 +341,7 @@ export function UsersPage({ users, setUsers, orders }) {
                               onClick={() => updateStatus(user.id, user.status === "Active" ? "Suspended" : "Active")}
                               aria-label="Toggle user status"
                             >
-                              {user.status === "Active" ? <ShieldAlert className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
+                              {user.status === "Active" ? <Edit3 className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
                             </Button>
                             <Button
                               variant="ghost"
@@ -316,10 +379,13 @@ export function UsersPage({ users, setUsers, orders }) {
                   <Detail icon={Mail} text={selected.email} />
                   <Detail icon={Phone} text={selected.phone} />
                   <Detail icon={MapPin} text={selected.address} />
-                  <Detail icon={UserCheck} text={`Joined ${formatDate(selected.createdAt)}`} />
+                  <Detail icon={UserCheck} text={`Joined ${formatDate(selected.joined)}`} />
                 </div>
                 <div className="rounded-md border p-3">
+                <div className="flex items-center gap-2">
+                  <PackageCheck className="h-4 w-4 text-gray-900" />
                   <p className="font-semibold">Order history</p>
+                  </div>
                   <div className="mt-3 space-y-3">
                     {selectedOrders.length ? selectedOrders.map((order) => (
                       <div key={order.id || order._id} className="flex items-center justify-between gap-3 border-b pb-3 last:border-0 last:pb-0">
@@ -333,6 +399,48 @@ export function UsersPage({ users, setUsers, orders }) {
                         </div>
                       </div>
                     )) : <p className="text-sm text-muted-foreground">No orders found.</p>}
+                  </div>
+                </div>
+
+                <div className="rounded-md border p-3">
+                  <div className="flex items-center gap-2">
+                    <Heart className="h-4 w-4 text-gray-900" />
+                    <p className="font-semibold">Wishlist</p>
+                  </div>
+                  <div className="mt-3 space-y-3">
+                    {wishlistLoading ? (
+                      <p className="text-sm text-muted-foreground">Loading wishlist...</p>
+                    ) : wishlist.length ? (
+                      wishlist.map((item) => (
+                        <div key={item.id} className="flex items-center justify-between gap-3 border-b pb-3 last:border-0 last:pb-0">
+                          <div className="flex items-center gap-3">
+                            {item.image ? (
+                              <img
+                                src={item.image}
+                                alt={item.name}
+                                className="h-10 w-10 rounded-md object-cover"
+                              />
+                            ) : null}
+                            <div>
+                              <p className="text-sm font-semibold">{item.name}</p>
+                              {item.addedAt ? (
+                                <p className="text-xs text-muted-foreground">Added {formatDate(item.addedAt)}</p>
+                              ) : null}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-bold">{formatCurrency(item.price)}</p>
+                            {item.hasDiscount ? (
+                              <p className="text-xs text-muted-foreground line-through">
+                                {formatCurrency(item.originalPrice)}
+                              </p>
+                            ) : null}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-muted-foreground">No wishlist items found.</p>
+                    )}
                   </div>
                 </div>
               </div>
