@@ -1190,9 +1190,14 @@ export function ProductsPage({
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
 
         <div>
-          <h2 className="text-3xl font-bold tracking-normal">
-            Products
-          </h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-3xl font-bold tracking-normal">
+              Products
+            </h2>
+            <span className="rounded-lg bg-primary px-3 py-1 text-lg font-semibold text-primary-foreground">
+              {products.length}
+            </span>
+          </div>
 
           <p className="mt-2 text-muted-foreground">
             Add, edit, filter and manage
@@ -1260,9 +1265,7 @@ export function ProductsPage({
           </CardTitle>
 
           <CardDescription>
-            {filtered.length} products
-            showing from{" "}
-            {products.length} total
+            <span className="font-bold">{filtered.length}</span> products showing
           </CardDescription>
 
         </CardHeader>

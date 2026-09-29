@@ -11,7 +11,7 @@ import {
   PackageCheck,
   Edit3,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -55,6 +55,7 @@ function normalizeUser(user) {
     address: user.address || user.city || "No Address",
     role: user.role || "Customer",
     status: normalizeStatus(user.status),
+    isHold: Boolean(user.isHold),
     joined: user.createdAt || user.joined || "",
     totalSpent: Number(user.totalSpent ?? 0),
     raw: user,
@@ -105,6 +106,18 @@ export function UsersPage({ users, setUsers, orders }) {
   const [viewMode, setViewMode] = useState("active");
   const [wishlist, setWishlist] = useState([]);
   const [wishlistLoading, setWishlistLoading] = useState(false);
+  const detailsRef = useRef(null);
+
+  // User select korle: chhoto screen e (details card niche thake) details e scroll korbe
+  const selectUser = (id) => {
+    setSelectedUserId(id);
+
+    if (window.matchMedia("(max-width: 1279px)").matches) {
+      requestAnimationFrame(() => {
+        detailsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+  };
 
   const fetchUsers = async (mode = viewMode) => {
     setLoading(true);
@@ -202,7 +215,6 @@ export function UsersPage({ users, setUsers, orders }) {
 
   const selected = selectedUser || users.find((user) => user.id === selectedUserId) || filtered[0];
 
-  
   const selectedOrders = selected
     ? orders.filter((order) => order.userId === selected.id || order.user === selected.id)
     : [];
@@ -259,11 +271,40 @@ export function UsersPage({ users, setUsers, orders }) {
     fetchUsers(mode);
   };
 
+  // Table (desktop) ar card (mobile) duitay ekoi action buttons
+  const renderActions = (user) =>
+    viewMode !== "deleted" && (
+      <>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => updateStatus(user.id, user.status === "Active" ? "Suspended" : "Active")}
+          aria-label="Toggle user status"
+        >
+          {user.status === "Active" ? <Edit3 className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-rose-600"
+          onClick={() => removeUser(user.id)}
+          aria-label="Delete user"
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </>
+    );
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-normal">Users</h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-2xl font-bold tracking-normal sm:text-3xl">Users</h2>
+            <span className="rounded-lg bg-primary px-3 py-1 text-lg font-semibold text-primary-foreground">
+              {users.length}
+            </span>
+          </div>
           <p className="mt-2 text-muted-foreground">Customer list, account status and order history.</p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -284,10 +325,10 @@ export function UsersPage({ users, setUsers, orders }) {
       )}
 
       <div className="grid gap-6 xl:grid-cols-[1.4fr_0.8fr]">
-        <Card>
+        <Card className="min-w-0">
           <CardHeader>
             <CardTitle>User Management</CardTitle>
-            <CardDescription>{filtered.length} customers showing from {users.length} total</CardDescription>
+            <CardDescription><span className="font-bold">{filtered.length}</span> customers showing</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="mb-4 grid gap-3 md:grid-cols-[1fr_170px]">
@@ -307,148 +348,170 @@ export function UsersPage({ users, setUsers, orders }) {
               </Select>
             </div>
 
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Is Hold</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.map((user) => (
-                  <TableRow key={user.id} className={selected?.id === user.id ? "bg-accent/45" : ""}>
-                    <TableCell>
-                      <button className="text-left" onClick={() => setSelectedUserId(user.id)}>
-                        <p className="font-semibold">{user.name}</p>
-                        <p className="text-xs text-muted-foreground">{user.email}</p>
-                      </button>
-                    </TableCell>
-                    <TableCell>{user.phone}</TableCell>
-                    <TableCell>{user.role}</TableCell>
-                    <TableCell><StatusBadge status={user.status} /></TableCell>
-                    <TableCell>{user.isHold ? "Yes, Holded" : "No"}</TableCell>
-                    <TableCell>
-                      <div className="flex justify-end gap-2">
-                        {viewMode !== "deleted" && (
-                          <>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => updateStatus(user.id, user.status === "Active" ? "Suspended" : "Active")}
-                              aria-label="Toggle user status"
-                            >
-                              {user.status === "Active" ? <Edit3 className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="text-rose-600"
-                              onClick={() => removeUser(user.id)}
-                              aria-label="Delete user"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                    </TableCell>
+            {/* ================= Mobile: card list ================= */}
+            <div className="space-y-3 md:hidden">
+              {filtered.map((user) => (
+                <div
+                  key={user.id}
+                  className={`rounded-lg border p-3 ${selected?.id === user.id ? "bg-accent/45" : ""}`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <button className="min-w-0 text-left" onClick={() => selectUser(user.id)}>
+                      <p className="break-words font-semibold">{user.name}</p>
+                      <p className="break-all text-xs text-muted-foreground">{user.email}</p>
+                    </button>
+                    <div className="shrink-0">
+                      <StatusBadge status={user.status} />
+                    </div>
+                  </div>
+
+                  <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
+                    <div className="col-span-2">
+                      <p className="text-xs text-muted-foreground">Phone</p>
+                      <p className="break-all">{user.phone}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Role</p>
+                      <p>{user.role}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Is Hold</p>
+                      <p className={user.isHold ? 'text-red-500' : ''}>{user.isHold ? "Holded" : "No"}</p>
+                    </div>
+                  </div>
+
+                  {viewMode !== "deleted" && (
+                    <div className="mt-3 flex justify-end gap-2 border-t pt-3">{renderActions(user)}</div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* ================= Desktop / Tablet: table ================= */}
+            <div className="hidden w-full overflow-x-auto md:block">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>User</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Is Hold</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {filtered.map((user) => (
+                    <TableRow key={user.id} className={selected?.id === user.id ? "bg-accent/45" : ""}>
+                      <TableCell>
+                        <button className="text-left" onClick={() => selectUser(user.id)}>
+                          <p className="font-semibold">{user.name}</p>
+                          <p className="text-xs text-muted-foreground">{user.email}</p>
+                        </button>
+                      </TableCell>
+                      <TableCell>{user.phone}</TableCell>
+                      <TableCell>{user.role}</TableCell>
+                      <TableCell><StatusBadge status={user.status} /></TableCell>
+                      <TableCell className={user.isHold ? "text-red-500" : ""}>{user.isHold ? "Holded" : "No"}</TableCell>
+                      <TableCell>
+                        <div className="flex justify-end gap-2">{renderActions(user)}</div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>User Details</CardTitle>
-            <CardDescription>{detailsLoading ? "Loading latest user..." : "Contact information and order history"}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {selected ? (
-              <div className="space-y-5">
-                <div>
-                  <h3 className="text-2xl font-bold">{selected.name}</h3>
-                  <div className="mt-2"><StatusBadge status={selected.status} /></div>
-                </div>
-                <div className="space-y-3 text-sm">
-                  <Detail icon={Mail} text={selected.email} />
-                  <Detail icon={Phone} text={selected.phone} />
-                  <Detail icon={MapPin} text={selected.address} />
-                  <Detail icon={UserCheck} text={`Joined ${formatDate(selected.joined)}`} />
-                </div>
-                <div className="rounded-md border p-3">
-                <div className="flex items-center gap-2">
-                  <PackageCheck className="h-4 w-4 text-gray-900" />
-                  <p className="font-semibold">Order history</p>
+        <div ref={detailsRef} className="min-w-0 scroll-mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>User Details</CardTitle>
+              <CardDescription>{detailsLoading ? "Loading latest user..." : "Contact information and order history"}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {selected ? (
+                <div className="space-y-5">
+                  <div>
+                    <h3 className="break-words text-xl font-bold sm:text-2xl">{selected.name}</h3>
+                    <div className="mt-2"><StatusBadge status={selected.status} /></div>
                   </div>
-                  <div className="mt-3 space-y-3">
-                    {selectedOrders.length ? selectedOrders.map((order) => (
-                      <div key={order.id || order._id} className="flex items-center justify-between gap-3 border-b pb-3 last:border-0 last:pb-0">
-                        <div>
-                          <p className="text-sm font-semibold">{order.id || order.tranId || order._id}</p>
-                          <p className="text-xs text-muted-foreground">{formatDate(order.date || order.createdAt)}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-bold">{formatCurrency(order.total || order.totalPrice)}</p>
-                          <StatusBadge status={order.status} />
-                        </div>
-                      </div>
-                    )) : <p className="text-sm text-muted-foreground">No orders found.</p>}
+                  <div className="space-y-3 text-sm">
+                    <Detail icon={Mail} text={selected.email} />
+                    <Detail icon={Phone} text={selected.phone} />
+                    <Detail icon={MapPin} text={selected.address} />
+                    <Detail icon={UserCheck} text={`Joined ${formatDate(selected.joined)}`} />
                   </div>
-                </div>
+                  <div className="rounded-md border p-3">
+                    <div className="flex items-center gap-2">
+                      <PackageCheck className="h-4 w-4 text-gray-900" />
+                      <p className="font-semibold">Order history</p>
+                    </div>
+                    <div className="mt-3 space-y-3">
+                      {selectedOrders.length ? selectedOrders.map((order) => (
+                        <div key={order.id || order._id} className="flex items-center justify-between gap-3 border-b pb-3 last:border-0 last:pb-0">
+                          <div className="min-w-0">
+                            <p className="break-all text-sm font-semibold">{order.id || order.tranId || order._id}</p>
+                            <p className="text-xs text-muted-foreground">{formatDate(order.date || order.createdAt)}</p>
+                          </div>
+                          <div className="shrink-0 text-right">
+                            <p className="text-sm font-bold">{formatCurrency(order.total || order.totalPrice)}</p>
+                            <StatusBadge status={order.status} />
+                          </div>
+                        </div>
+                      )) : <p className="text-sm text-muted-foreground">No orders found.</p>}
+                    </div>
+                  </div>
 
-                <div className="rounded-md border p-3">
-                  <div className="flex items-center gap-2">
-                    <Heart className="h-4 w-4 text-gray-900" />
-                    <p className="font-semibold">Wishlist</p>
-                  </div>
-                  <div className="mt-3 space-y-3">
-                    {wishlistLoading ? (
-                      <p className="text-sm text-muted-foreground">Loading wishlist...</p>
-                    ) : wishlist.length ? (
-                      wishlist.map((item) => (
-                        <div key={item.id} className="flex items-center justify-between gap-3 border-b pb-3 last:border-0 last:pb-0">
-                          <div className="flex items-center gap-3">
-                            {item.image ? (
-                              <img
-                                src={item.image}
-                                alt={item.name}
-                                className="h-10 w-10 rounded-md object-cover"
-                              />
-                            ) : null}
-                            <div>
-                              <p className="text-sm font-semibold">{item.name}</p>
-                              {item.addedAt ? (
-                                <p className="text-xs text-muted-foreground">Added {formatDate(item.addedAt)}</p>
+                  <div className="rounded-md border p-3">
+                    <div className="flex items-center gap-2">
+                      <Heart className="h-4 w-4 text-gray-900" />
+                      <p className="font-semibold">Wishlist</p>
+                    </div>
+                    <div className="mt-3 space-y-3">
+                      {wishlistLoading ? (
+                        <p className="text-sm text-muted-foreground">Loading wishlist...</p>
+                      ) : wishlist.length ? (
+                        wishlist.map((item) => (
+                          <div key={item.id} className="flex items-center justify-between gap-3 border-b pb-3 last:border-0 last:pb-0">
+                            <div className="flex min-w-0 items-center gap-3">
+                              {item.image ? (
+                                <img
+                                  src={item.image}
+                                  alt={item.name}
+                                  className="h-10 w-10 shrink-0 rounded-md object-cover"
+                                />
+                              ) : null}
+                              <div className="min-w-0">
+                                <p className="break-words text-sm font-semibold">{item.name}</p>
+                                {item.addedAt ? (
+                                  <p className="text-xs text-muted-foreground">Added {formatDate(item.addedAt)}</p>
+                                ) : null}
+                              </div>
+                            </div>
+                            <div className="shrink-0 text-right">
+                              <p className="text-sm font-bold">{formatCurrency(item.price)}</p>
+                              {item.hasDiscount ? (
+                                <p className="text-xs text-muted-foreground line-through">
+                                  {formatCurrency(item.originalPrice)}
+                                </p>
                               ) : null}
                             </div>
                           </div>
-                          <div className="text-right">
-                            <p className="text-sm font-bold">{formatCurrency(item.price)}</p>
-                            {item.hasDiscount ? (
-                              <p className="text-xs text-muted-foreground line-through">
-                                {formatCurrency(item.originalPrice)}
-                              </p>
-                            ) : null}
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-sm text-muted-foreground">No wishlist items found.</p>
-                    )}
+                        ))
+                      ) : (
+                        <p className="text-sm text-muted-foreground">No wishlist items found.</p>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">Select a user to view details.</p>
-            )}
-          </CardContent>
-        </Card>
+              ) : (
+                <p className="text-sm text-muted-foreground">Select a user to view details.</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
@@ -456,9 +519,9 @@ export function UsersPage({ users, setUsers, orders }) {
 
 function Detail({ icon: Icon, text }) {
   return (
-    <div className="flex items-center gap-3">
-      <Icon className="h-4 w-4 text-muted-foreground" />
-      <span>{text}</span>
+    <div className="flex items-start gap-3">
+      <Icon className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+      <span className="min-w-0 break-words">{text}</span>
     </div>
   );
 }

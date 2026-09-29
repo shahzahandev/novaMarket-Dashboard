@@ -8,12 +8,14 @@ import { ReportsPage } from "@/pages/reports";
 import { SettingsPage } from "@/pages/settings";
 import { UsersPage } from "@/pages/users";
 import { BannerPage } from "@/pages/banner";
+import { Wishlist } from "./pages/wishlist";
 
 const pageTitles = {
   dashboard: "Dashboard",
-  banner: "Banner",           // ⬅ notun line
+  banner: "Banner",
   products: "Products",
   users: "Users",
+  wishlist: "Wishlist",
   orders: "Orders",
   reports: "Reports",
   settings: "Settings",
@@ -67,11 +69,14 @@ export default function App() {
     if (activePage === "products") {
       return <ProductsPage products={products} setProducts={setProducts} />;
     }
-   if (activePage === "banner") {          // ⬅ notun block
+   if (activePage === "banner") {     
     return <BannerPage />;
   }
     if (activePage === "users") {
       return <UsersPage users={users} setUsers={setUsers} orders={orders} />;
+    }
+    if(activePage === "wishlist"){
+      return <Wishlist />
     }
     if (activePage === "orders") {
       return <OrdersPage orders={orders} setOrders={setOrders} />;

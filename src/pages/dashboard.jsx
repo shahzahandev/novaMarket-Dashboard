@@ -1,6 +1,7 @@
 import {
   AlertTriangle,
   BadgeDollarSign,
+  Heart,
   Package,
   ShoppingBag,
   TrendingUp,
@@ -19,11 +20,13 @@ const API_BASE = "https://nova-market-backend-2.onrender.com/api/v1";
 const ALL_USERS_URL = `${API_BASE}/user/allUsers`;
 const ALL_PRODUCTS_URL = `${API_BASE}/product/allProduct`;
 const ALL_ORDER_URL = `${API_BASE}/order/allOrder`;
+const ALL_WISHLIST_URL = `${API_BASE}/wishlist/allWishlist`
 
 export function DashboardPage({ products, users, orders, chartData, activity }) {
   const [userList, setUserList] = useState([]);
   const [productList, setProductList] = useState([]);
   const [orderList, setOrderList] = useState([]);
+  const [ wishlist, setWishlist] = useState([])
 
   const revenue = orderList
     .filter((orderList) => orderList.status == "Delivered")
@@ -32,7 +35,7 @@ export function DashboardPage({ products, users, orders, chartData, activity }) 
   const lowStock = products.filter((product) => product.stock <= 8).length;
   const delivered = orders.filter((order) => order.status === "Delivered").length;
 
-
+// All users
   useEffect(() => {
     async function fetchUsers() {
       let data = await axios.get(ALL_USERS_URL);
@@ -41,7 +44,17 @@ export function DashboardPage({ products, users, orders, chartData, activity }) 
     fetchUsers()
   }, []);
 
+  // ALl Wishlist
+   useEffect(() => {
+    async function fetchUsers() {
+      let data = await axios.get(ALL_WISHLIST_URL);
+      setWishlist(data.data.data);      
+    }
+    fetchUsers()
+  }, []);
 
+
+// ALl Product
   useEffect(() => {
     async function fetchUsers() {
       let data = await axios.get(ALL_PRODUCTS_URL);
@@ -50,7 +63,7 @@ export function DashboardPage({ products, users, orders, chartData, activity }) 
     fetchUsers()
   }, []);
 
-
+// All order
   useEffect(() => {
     async function fetchUsers() {
       let data = await axios.get(ALL_ORDER_URL);
@@ -73,10 +86,11 @@ export function DashboardPage({ products, users, orders, chartData, activity }) 
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <MetricCard title="All Orders" value={orderList.length} note={`${delivered} delivered`} icon={ShoppingBag} tone="cyan" />
+        <MetricCard title="All Wishlists" value={wishlist.length} icon={Heart} />
+        <MetricCard title="All Products" value={productList.length} note={`${lowStock} need attention`} icon={Package} tone="amber" />
+        <MetricCard title="All Customers" value={userList.length} note="new leads" icon={Users} tone="indigo" />
         <MetricCard title="Revenue" value={formatCurrency(revenue)} icon={BadgeDollarSign} tone="emerald" />
-        <MetricCard title="Orders" value={orderList.length} note={`${delivered} delivered`} icon={ShoppingBag} tone="cyan" />
-        <MetricCard title="Products" value={productList.length} note={`${lowStock} need attention`} icon={Package} tone="amber" />
-        <MetricCard title="Customers" value={userList.length} note="new leads" icon={Users} tone="indigo" />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.5fr_0.9fr]">
@@ -92,11 +106,11 @@ export function DashboardPage({ products, users, orders, chartData, activity }) 
             <PulseItem icon={ShoppingBag} title="Pending orders" value={orderList.filter((o) => o.status === "Pending").length} tone="text-cyan-700" />
             <div className="rounded-md border bg-muted/30 p-3">
               <p className="text-sm font-semibold">Recent activity</p>
-              <div className="mt-3 space-y-2">
+              {/* <div className="mt-3 space-y-2">
                 {activity.map((item) => (
                   <p key={item} className="text-sm text-muted-foreground">{item}</p>
                 ))}
-              </div>
+              </div> */}
             </div>
           </CardContent>
         </Card>

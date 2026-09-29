@@ -16,18 +16,18 @@ const ALL_ORDER_URL = `${API_BASE}/order/allOrder`;
 const orderStatuses = ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"];
 
 export function OrdersPage({ }) {
-  const [ orders, setOrders] = useState([]);
+  const [orders, setOrders] = useState([]);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
 
 
   useEffect(() => {
-  async function fetchUsers() {
-    let data = await axios.get(ALL_ORDER_URL);
-    setOrders(data.data.order);
-  }
-  fetchUsers()
-}, [orders]);
+    async function fetchUsers() {
+      let data = await axios.get(ALL_ORDER_URL);
+      setOrders(data.data.order);
+    }
+    fetchUsers()
+  }, [orders]);
 
 
 
@@ -36,7 +36,7 @@ export function OrdersPage({ }) {
     processing: orders.filter((order) => order.status === "processing").length,
     shipped: orders.filter((order) => order.status === "shipped").length,
     delivered: orders.filter((order) => order.status === "Delivered").length,
-  }), [orders]);  
+  }), [orders]);
 
   const filtered = useMemo(() => {
     return orders.filter((order) => {
@@ -56,7 +56,12 @@ export function OrdersPage({ }) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-normal">Orders</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-3xl font-bold tracking-normal">Orders</h2>
+          <span className="rounded-lg bg-primary px-3 py-1 text-lg font-semibold text-primary-foreground">
+            {orders.length}
+          </span>
+        </div>
         <p className="mt-2 text-muted-foreground">Track payments, delivery status and fulfillment workflow.</p>
       </div>
 
