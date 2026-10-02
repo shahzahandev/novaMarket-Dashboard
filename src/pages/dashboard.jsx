@@ -12,7 +12,7 @@ import { MetricCard } from "@/components/metric-card";
 import { StatusBadge } from "@/components/status-badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatDate } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
@@ -22,11 +22,11 @@ const ALL_PRODUCTS_URL = `${API_BASE}/product/allProduct`;
 const ALL_ORDER_URL = `${API_BASE}/order/allOrder`;
 const ALL_WISHLIST_URL = `${API_BASE}/wishlist/allWishlist`
 
-export function DashboardPage({ products, users, orders, chartData, activity }) {
+export function DashboardPage({ products, users, orders, chartData, }) {
   const [userList, setUserList] = useState([]);
   const [productList, setProductList] = useState([]);
   const [orderList, setOrderList] = useState([]);
-  const [ wishlist, setWishlist] = useState([])
+  const [wishlist, setWishlist] = useState([])
 
   const revenue = orderList
     .filter((orderList) => orderList.status == "Delivered")
@@ -35,7 +35,7 @@ export function DashboardPage({ products, users, orders, chartData, activity }) 
   const lowStock = products.filter((product) => product.stock <= 8).length;
   const delivered = orders.filter((order) => order.status === "Delivered").length;
 
-// All users
+  // All users
   useEffect(() => {
     async function fetchUsers() {
       let data = await axios.get(ALL_USERS_URL);
@@ -45,16 +45,16 @@ export function DashboardPage({ products, users, orders, chartData, activity }) 
   }, []);
 
   // ALl Wishlist
-   useEffect(() => {
+  useEffect(() => {
     async function fetchUsers() {
       let data = await axios.get(ALL_WISHLIST_URL);
-      setWishlist(data.data.data);      
+      setWishlist(data.data.data);
     }
     fetchUsers()
   }, []);
 
 
-// ALl Product
+  // ALl Product
   useEffect(() => {
     async function fetchUsers() {
       let data = await axios.get(ALL_PRODUCTS_URL);
@@ -63,7 +63,7 @@ export function DashboardPage({ products, users, orders, chartData, activity }) 
     fetchUsers()
   }, []);
 
-// All order
+  // All order
   useEffect(() => {
     async function fetchUsers() {
       let data = await axios.get(ALL_ORDER_URL);
@@ -85,7 +85,7 @@ export function DashboardPage({ products, users, orders, chartData, activity }) 
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <MetricCard title="All Orders" value={orderList.length} note={`${delivered} delivered`} icon={ShoppingBag} tone="cyan" />
         <MetricCard title="All Wishlists" value={wishlist.length} icon={Heart} />
         <MetricCard title="All Products" value={productList.length} note={`${lowStock} need attention`} icon={Package} tone="amber" />
@@ -101,17 +101,9 @@ export function DashboardPage({ products, users, orders, chartData, activity }) 
             <CardDescription>Tasks that usually matter in a dashboard</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <PulseItem icon={TrendingUp} title="Conversion rate" value="7.8%" tone="text-emerald-600" />
             <PulseItem icon={AlertTriangle} title="Low stock alerts" value={lowStock} tone="text-amber-600" />
-            <PulseItem icon={ShoppingBag} title="Pending orders" value={orderList.filter((o) => o.status === "Pending").length} tone="text-cyan-700" />
-            <div className="rounded-md border bg-muted/30 p-3">
-              <p className="text-sm font-semibold">Recent activity</p>
-              {/* <div className="mt-3 space-y-2">
-                {activity.map((item) => (
-                  <p key={item} className="text-sm text-muted-foreground">{item}</p>
-                ))}
-              </div> */}
-            </div>
+            <PulseItem icon={ShoppingBag} title="Pending orders" value={orderList.filter((o) => o.status === "pending").length} tone="text-cyan-700" />
+            <PulseItem icon={TrendingUp} title="Conversion rate" value="7.8%" tone="text-emerald-600" />
           </CardContent>
         </Card>
       </div>
@@ -125,19 +117,26 @@ export function DashboardPage({ products, users, orders, chartData, activity }) 
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Order</TableHead>
                 <TableHead>Customer</TableHead>
+                <TableHead>Order Date</TableHead>
                 <TableHead>Total</TableHead>
+                <TableHead>Pay Method</TableHead>
+                <TableHead>Delivery Area</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {orderList.slice(0, 5).map((order) => (
                 <TableRow key={order._id}>
-                  <TableCell className="font-semibold">{order._id}</TableCell>
-                  <TableCell>model a set kori nai</TableCell>
+                  <TableCell>
+                      <p className="font-medium">{order.shipping?.name}</p>
+                      <p className="text-xs text-muted-foreground">{order.shipping?.email}</p>
+                    </TableCell>   
+                    <TableCell>{formatDate(order.createdAt)}</TableCell>
                   <TableCell>{formatCurrency(order.totalPrice)}</TableCell>
-                  <TableCell><StatusBadge status={order.status} /></TableCell>
+                  <TableCell className="uppercase">{order.paymentMethod}</TableCell>
+                  <TableCell className="capitalize">{order.deliveryArea} Dhaka</TableCell>
+                  <TableCell><StatusBadge status={order.status} /></TableCell>                 
                 </TableRow>
               ))}
             </TableBody>

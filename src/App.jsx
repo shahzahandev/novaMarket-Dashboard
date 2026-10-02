@@ -9,10 +9,12 @@ import { SettingsPage } from "@/pages/settings";
 import { UsersPage } from "@/pages/users";
 import { BannerPage } from "@/pages/banner";
 import { Wishlist } from "./pages/wishlist";
+import { DeliverySettings } from "@/pages/DeliverySettings";
 
 const pageTitles = {
   dashboard: "Dashboard",
   banner: "Banner",
+  deliverys: "Deliverys",
   products: "Products",
   users: "Users",
   wishlist: "Wishlist",
@@ -71,6 +73,9 @@ export default function App() {
     }
    if (activePage === "banner") {     
     return <BannerPage />;
+  }
+   if (activePage === "deliverys") {     
+    return <DeliverySettings />;
   }
     if (activePage === "users") {
       return <UsersPage users={users} setUsers={setUsers} orders={orders} />;
