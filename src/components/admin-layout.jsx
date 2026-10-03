@@ -1,4 +1,4 @@
-import { BarChart3, Bell, Headphones, Heart, LayoutDashboard, LogOut, Menu, Package, Settings, ShoppingBag, Truck, Users, X } from "lucide-react";
+import { BarChart3, Bell, Headphones, Heart, LayoutDashboard, LogOut, Menu, NotepadText, Package, Phone, Settings, ShoppingBag, Truck, Users, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -6,7 +6,8 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },  
   { id: "deliverys", label: "Delivery", icon: Truck },
-  { id: "banner", label: "banner", icon: Package },
+  { id: "banner", label: "banner", icon: NotepadText },
+  { id: "whatsapp", label: "Whatsapp", icon: Phone },
   { id: "products", label: "Products", icon: Package },
   { id: "users", label: "Users", icon: Users },
   { id: "wishlist", label: "Wishlist", icon: Heart },

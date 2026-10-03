@@ -10,11 +10,13 @@ import { UsersPage } from "@/pages/users";
 import { BannerPage } from "@/pages/banner";
 import { Wishlist } from "./pages/wishlist";
 import { DeliverySettings } from "@/pages/DeliverySettings";
+import  { WhatsApp } from "@/pages/whatsApp";
 
 const pageTitles = {
   dashboard: "Dashboard",
   banner: "Banner",
   deliverys: "Deliverys",
+  whatsapp: "WhatsApp",
   products: "Products",
   users: "Users",
   wishlist: "Wishlist",
@@ -76,6 +78,9 @@ export default function App() {
   }
    if (activePage === "deliverys") {     
     return <DeliverySettings />;
+  }
+   if (activePage === "whatsapp") {     
+    return <WhatsApp />;
   }
     if (activePage === "users") {
       return <UsersPage users={users} setUsers={setUsers} orders={orders} />;

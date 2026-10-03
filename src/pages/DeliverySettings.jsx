@@ -219,7 +219,7 @@ export function DeliverySettings() {
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Delivery settings</h1>
             <p className="text-sm text-muted-foreground">
-              Delivery charge ar free delivery rule gulo ekhane theke control koro.
+              Normal charge, Cart total charge, Free charge for limit date or infinite 
             </p>
           </div>
         </div>
@@ -238,8 +238,8 @@ export function DeliverySettings() {
       {/* 1. Charges */}
       <Card>
         <CardHeader>
-          <CardTitle>Delivery charge</CardTitle>
-          <CardDescription>Customer er selected area onujayi charge hobe.</CardDescription>
+          <CardTitle><span>1.</span> Delivery charge</CardTitle>
+          <CardDescription>Delivery charge for fix area </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
@@ -277,9 +277,9 @@ export function DeliverySettings() {
         <CardHeader>
           <div className="flex items-center justify-between gap-4">
             <div className="space-y-1.5">
-              <CardTitle>Free delivery by cart total</CardTitle>
+              <CardTitle><span>2.</span> Free delivery by cart total</CardTitle>
               <CardDescription>
-                Cart total ei amount er shoman ba beshi hole delivery charge free.
+               Free delivery if cart amount qual or up.
               </CardDescription>
             </div>
             <Switch
@@ -311,9 +311,9 @@ export function DeliverySettings() {
         <CardHeader>
           <div className="flex items-center justify-between gap-4">
             <div className="space-y-1.5">
-              <CardTitle>Free delivery for all products</CardTitle>
+              <CardTitle><span>3.</span> Free delivery for all products</CardTitle>
               <CardDescription>
-                Nidisto somoyer jonno shob order e delivery charge free. Cart total jai hok.
+                Free delivery for limit date or infinite time
               </CardDescription>
             </div>
             <Switch
@@ -374,8 +374,8 @@ export function DeliverySettings() {
 
           {form.freeAllEnabled && noDates && (
             <p className=" rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800">
-              Start ar end date dui-i khali. Eta on thakle free delivery <b>shob shomoy</b> cholbe,
-              jotokkhon na tumi switch off koro.
+            Both start and end dates are empty. When enabled, free delivery will remain active at all times until you turn off the switch.
+
             </p>
           )}
         </CardContent>
@@ -384,9 +384,9 @@ export function DeliverySettings() {
       {/* 4. Preview */}
       <Card>
         <CardHeader>
-          <CardTitle>Preview</CardTitle>
+          <CardTitle><span>4.</span> Preview</CardTitle>
           <CardDescription>
-            Save korar age dekho customer ki charge dekhbe (ekhon-er unsaved value diye).
+            Preview what delivery charge customers will see before saving (using the current unsaved values).
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

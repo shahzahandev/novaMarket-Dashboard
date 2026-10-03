@@ -4,14 +4,15 @@ import {
   Phone,
   RefreshCw,
   Search,
-  ShieldAlert,
   Trash2,
   UserCheck,
   Heart,
   PackageCheck,
   Edit3,
+  Eye,
+  X,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,6 +27,7 @@ const singleUserUrl = (id) => `${API_BASE}/user/singleUser/${id}`;
 const updateUserUrl = (id) => `${API_BASE}/user/updateUser/${id}`;
 const deleteUserUrl = (id) => `${API_BASE}/user/deleteUser/${id}`;
 const singleWishlistUrl = (id) => `${API_BASE}/wishlist/singleWishlist/${id}`;
+const singleUserOrdersUrl = (id) => `${API_BASE}/order/getSingleUserOrders/${id}`;
 
 function normalizeStatus(status) {
   const value = String(status || "active").toLowerCase();
@@ -35,7 +37,6 @@ function normalizeStatus(status) {
     delete: "Deleted",
     deleted: "Deleted",
   };
-
   return statuses[value] || "Active";
 }
 
@@ -95,28 +96,47 @@ function extractWishlistItems(data) {
   return Array.isArray(list) ? list : [];
 }
 
-export function UsersPage({ users, setUsers, orders }) {
+// Backend order response ke UI er jonno ek format e ana
+function normalizeOrder(order, index) {
+  return {
+    id: order._id || order.id || `ord-${index}`,
+    tranId: order.tranId || order.orderId || "",
+    total: Number(order.totalPrice ?? order.total ?? order.totalAmount ?? 0),
+    status: order.status || order.orderStatus || "Pending",
+    date: order.createdAt || order.date || "",
+  };
+}
+
+function extractOrders(data) {
+  const list = data.orders || data.order || data.data || data.userOrders || [];
+  return Array.isArray(list) ? list : [];
+}
+
+export function UsersPage({ users, setUsers }) {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [error, setError] = useState("");
   const [viewMode, setViewMode] = useState("active");
   const [wishlist, setWishlist] = useState([]);
   const [wishlistLoading, setWishlistLoading] = useState(false);
-  const detailsRef = useRef(null);
+  const [userOrders, setUserOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
 
-  // User select korle: chhoto screen e (details card niche thake) details e scroll korbe
+  // User e click ba eye icon e click korle popup khulbe
   const selectUser = (id) => {
     setSelectedUserId(id);
+    setDetailsOpen(true);
+  };
 
-    if (window.matchMedia("(max-width: 1279px)").matches) {
-      requestAnimationFrame(() => {
-        detailsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
-    }
+  const closeDetails = () => {
+    setDetailsOpen(false);
+    setSelectedUserId(null);
+    setSelectedUser(null);
   };
 
   const fetchUsers = async (mode = viewMode) => {
@@ -131,10 +151,6 @@ export function UsersPage({ users, setUsers, orders }) {
       const userList = extractUsers(data);
       const normalized = Array.isArray(userList) ? userList.map(normalizeUser) : [];
       setUsers(normalized);
-
-      if (normalized.length && !normalized.some((user) => user.id === selectedUserId)) {
-        setSelectedUserId(normalized[0].id);
-      }
     } catch (err) {
       setError("Live API theke user load kora jayni. Demo data ekhono dekhacche.");
       console.error(err);
@@ -146,6 +162,24 @@ export function UsersPage({ users, setUsers, orders }) {
   useEffect(() => {
     fetchUsers("active");
   }, []);
+
+  // Popup khola thakle Esc chaple bondho hobe + background scroll lock
+  useEffect(() => {
+    if (!detailsOpen) return;
+
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") closeDetails();
+    };
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [detailsOpen]);
 
   useEffect(() => {
     async function fetchSingleUser() {
@@ -202,6 +236,33 @@ export function UsersPage({ users, setUsers, orders }) {
     fetchWishlist();
   }, [selectedUserId]);
 
+  // Selected user er order gulo backend theke ana
+  useEffect(() => {
+    async function fetchUserOrders() {
+      if (!selectedUserId) {
+        setUserOrders([]);
+        return;
+      }
+
+      setOrdersLoading(true);
+
+      try {
+        const response = await fetch(singleUserOrdersUrl(selectedUserId));
+        if (!response.ok) throw new Error("Failed to load user orders");
+
+        const data = await response.json();
+        setUserOrders(extractOrders(data).map(normalizeOrder));
+      } catch (err) {
+        setUserOrders([]);
+        console.error(err);
+      } finally {
+        setOrdersLoading(false);
+      }
+    }
+
+    fetchUserOrders();
+  }, [selectedUserId]);
+
   const filtered = useMemo(() => {
     return users.filter((user) => {
       const matchesQuery = [user.name, user.email, user.phone, user.city, user.address]
@@ -213,11 +274,7 @@ export function UsersPage({ users, setUsers, orders }) {
     });
   }, [users, query, status]);
 
-  const selected = selectedUser || users.find((user) => user.id === selectedUserId) || filtered[0];
-
-  const selectedOrders = selected
-    ? orders.filter((order) => order.userId === selected.id || order.user === selected.id)
-    : [];
+  const selected = selectedUser || users.find((user) => user.id === selectedUserId) || null;
 
   const updateStatus = async (id, nextStatus) => {
     setError("");
@@ -253,10 +310,7 @@ export function UsersPage({ users, setUsers, orders }) {
       if (!response.ok) throw new Error("Failed to delete user");
 
       setUsers((current) => current.filter((user) => user.id !== id));
-      if (selectedUserId === id) {
-        setSelectedUserId(null);
-        setSelectedUser(null);
-      }
+      if (selectedUserId === id) closeDetails();
     } catch (err) {
       setError("User delete hoyni. Backend endpoint/auth/CORS check korte hobe.");
       console.error(err);
@@ -266,34 +320,45 @@ export function UsersPage({ users, setUsers, orders }) {
   const changeMode = (mode) => {
     setViewMode(mode);
     setStatus(mode === "deleted" ? "Deleted" : "All");
-    setSelectedUserId(null);
-    setSelectedUser(null);
+    closeDetails();
     fetchUsers(mode);
   };
 
   // Table (desktop) ar card (mobile) duitay ekoi action buttons
-  const renderActions = (user) =>
-    viewMode !== "deleted" && (
-      <>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => updateStatus(user.id, user.status === "Active" ? "Suspended" : "Active")}
-          aria-label="Toggle user status"
-        >
-          {user.status === "Active" ? <Edit3 className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-rose-600"
-          onClick={() => removeUser(user.id)}
-          aria-label="Delete user"
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      </>
-    );
+  const renderActions = (user) => (
+    <>
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => selectUser(user.id)}
+        aria-label="View user details"
+      >
+        <Eye className="h-4 w-4" />
+      </Button>
+
+      {viewMode !== "deleted" && (
+        <>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => updateStatus(user.id, user.status === "Active" ? "Suspended" : "Active")}
+            aria-label="Toggle user status"
+          >
+            {user.status === "Active" ? <Edit3 className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-rose-600"
+            onClick={() => removeUser(user.id)}
+            aria-label="Delete user"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </>
+      )}
+    </>
+  );
 
   return (
     <div className="space-y-6">
@@ -324,113 +389,130 @@ export function UsersPage({ users, setUsers, orders }) {
         </div>
       )}
 
-      <div className="grid gap-6 xl:grid-cols-[1.4fr_0.8fr]">
-        <Card className="min-w-0">
-          <CardHeader>
-            <CardTitle>User Management</CardTitle>
-            <CardDescription><span className="font-bold">{filtered.length}</span> customers showing</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="mb-4 grid gap-3 md:grid-cols-[1fr_170px]">
-              <div className="relative">
-                <Search className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  className="pl-9"
-                  placeholder="Search user, email, phone or address"
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                />
-              </div>
-              <Select value={status} onChange={(event) => setStatus(event.target.value)}>
-                <option>All</option>
-                <option>Active</option>
-                <option>Inactive</option>
-              </Select>
+      {/* ================= User Management: full width ================= */}
+      <Card className="w-full min-w-0">
+        <CardHeader>
+          <CardTitle>User Management</CardTitle>
+          <CardDescription><span className="font-bold">{filtered.length}</span> customers showing</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="mb-4 grid gap-3 md:grid-cols-[1fr_170px]">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                className="pl-9"
+                placeholder="Search user, email, phone or address"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+              />
             </div>
+            <Select value={status} onChange={(event) => setStatus(event.target.value)}>
+              <option>All</option>
+              <option>Active</option>
+              <option>Inactive</option>
+            </Select>
+          </div>
 
-            {/* ================= Mobile: card list ================= */}
-            <div className="space-y-3 md:hidden">
-              {filtered.map((user) => (
-                <div
-                  key={user.id}
-                  className={`rounded-lg border p-3 ${selected?.id === user.id ? "bg-accent/45" : ""}`}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <button className="min-w-0 text-left" onClick={() => selectUser(user.id)}>
-                      <p className="break-words font-semibold">{user.name}</p>
-                      <p className="break-all text-xs text-muted-foreground">{user.email}</p>
-                    </button>
-                    <div className="shrink-0">
-                      <StatusBadge status={user.status} />
-                    </div>
+          {/* ================= Mobile: card list ================= */}
+          <div className="space-y-3 md:hidden">
+            {filtered.map((user) => (
+              <div
+                key={user.id}
+                className={`rounded-lg border p-3 ${selected?.id === user.id ? "bg-accent/45" : ""}`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <button className="min-w-0 text-left" onClick={() => selectUser(user.id)}>
+                    <p className="break-words font-semibold">{user.name}</p>
+                    <p className="break-all text-xs text-muted-foreground">{user.email}</p>
+                  </button>
+                  <div className="shrink-0">
+                    <StatusBadge status={user.status} />
                   </div>
-
-                  <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
-                    <div className="col-span-2">
-                      <p className="text-xs text-muted-foreground">Phone</p>
-                      <p className="break-all">{user.phone}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Role</p>
-                      <p>{user.role}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Is Hold</p>
-                      <p className={user.isHold ? 'text-red-500' : ''}>{user.isHold ? "Holded" : "No"}</p>
-                    </div>
-                  </div>
-
-                  {viewMode !== "deleted" && (
-                    <div className="mt-3 flex justify-end gap-2 border-t pt-3">{renderActions(user)}</div>
-                  )}
                 </div>
-              ))}
-            </div>
 
-            {/* ================= Desktop / Tablet: table ================= */}
-            <div className="hidden w-full overflow-x-auto md:block">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>User</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Is Hold</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
+                  <div className="col-span-2">
+                    <p className="text-xs text-muted-foreground">Phone</p>
+                    <p className="break-all">{user.phone}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Role</p>
+                    <p>{user.role}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Is Hold</p>
+                    <p className={user.isHold ? "text-red-500" : ""}>{user.isHold ? "Holded" : "No"}</p>
+                  </div>
+                </div>
+
+                <div className="mt-3 flex justify-end gap-2 border-t pt-3">{renderActions(user)}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* ================= Desktop / Tablet: table ================= */}
+          <div className="hidden w-full overflow-x-auto md:block">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>User</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Is Hold</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.map((user) => (
+                  <TableRow key={user.id} className={selected?.id === user.id ? "bg-accent/45" : ""}>
+                    <TableCell>
+                      <button className="text-left" onClick={() => selectUser(user.id)}>
+                        <p className="font-semibold">{user.name}</p>
+                        <p className="text-xs text-muted-foreground">{user.email}</p>
+                      </button>
+                    </TableCell>
+                    <TableCell>{user.phone}</TableCell>
+                    <TableCell>{user.role}</TableCell>
+                    <TableCell><StatusBadge status={user.status} /></TableCell>
+                    <TableCell className={user.isHold ? "text-red-500" : ""}>{user.isHold ? "Holded" : "No"}</TableCell>
+                    <TableCell>
+                      <div className="flex justify-end gap-2">{renderActions(user)}</div>
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filtered.map((user) => (
-                    <TableRow key={user.id} className={selected?.id === user.id ? "bg-accent/45" : ""}>
-                      <TableCell>
-                        <button className="text-left" onClick={() => selectUser(user.id)}>
-                          <p className="font-semibold">{user.name}</p>
-                          <p className="text-xs text-muted-foreground">{user.email}</p>
-                        </button>
-                      </TableCell>
-                      <TableCell>{user.phone}</TableCell>
-                      <TableCell>{user.role}</TableCell>
-                      <TableCell><StatusBadge status={user.status} /></TableCell>
-                      <TableCell className={user.isHold ? "text-red-500" : ""}>{user.isHold ? "Holded" : "No"}</TableCell>
-                      <TableCell>
-                        <div className="flex justify-end gap-2">{renderActions(user)}</div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
 
-        <div ref={detailsRef} className="min-w-0 scroll-mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>User Details</CardTitle>
-              <CardDescription>{detailsLoading ? "Loading latest user..." : "Contact information and order history"}</CardDescription>
-            </CardHeader>
-            <CardContent>
+      {/* ================= User Details: popup ================= */}
+      {detailsOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={closeDetails}
+          role="dialog"
+          aria-modal="true"
+          aria-label="User details"
+        >
+          <div
+            className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg border bg-background shadow-xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b bg-background px-5 py-4">
+              <div className="min-w-0">
+                <h3 className="text-lg font-semibold">User Details</h3>
+                <p className="text-sm text-muted-foreground">
+                  {detailsLoading ? "Loading latest user..." : "Contact information and order history"}
+                </p>
+              </div>
+              <Button variant="ghost" size="icon" onClick={closeDetails} aria-label="Close user details">
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="p-5">
               {selected ? (
                 <div className="space-y-5">
                   <div>
@@ -447,20 +529,29 @@ export function UsersPage({ users, setUsers, orders }) {
                     <div className="flex items-center gap-2">
                       <PackageCheck className="h-4 w-4 text-gray-900" />
                       <p className="font-semibold">Order history</p>
+                      <span className="rounded-lg bg-primary px-3 py-1 text-sm font-semibold text-primary-foreground">
+                        {userOrders.length}
+                      </span>
                     </div>
                     <div className="mt-3 space-y-3">
-                      {selectedOrders.length ? selectedOrders.map((order) => (
-                        <div key={order.id || order._id} className="flex items-center justify-between gap-3 border-b pb-3 last:border-0 last:pb-0">
-                          <div className="min-w-0">
-                            <p className="break-all text-sm font-semibold">{order.id || order.tranId || order._id}</p>
-                            <p className="text-xs text-muted-foreground">{formatDate(order.date || order.createdAt)}</p>
+                      {ordersLoading ? (
+                        <p className="text-sm text-muted-foreground">Loading orders...</p>
+                      ) : userOrders.length ? (
+                        userOrders.map((order) => (
+                          <div key={order.id} className="flex items-center justify-between gap-3 border-b pb-3 last:border-0 last:pb-0">
+                            <div className="min-w-0">
+                              <p className="break-all text-sm font-semibold">{order.tranId || order.id}</p>
+                              <p className="text-xs text-muted-foreground">{formatDate(order.date)}</p>
+                            </div>
+                            <div className="shrink-0 text-right">
+                              <p className="text-sm font-bold">{formatCurrency(order.total)}</p>
+                              <StatusBadge status={order.status} />
+                            </div>
                           </div>
-                          <div className="shrink-0 text-right">
-                            <p className="text-sm font-bold">{formatCurrency(order.total || order.totalPrice)}</p>
-                            <StatusBadge status={order.status} />
-                          </div>
-                        </div>
-                      )) : <p className="text-sm text-muted-foreground">No orders found.</p>}
+                        ))
+                      ) : (
+                        <p className="text-sm text-muted-foreground">No orders found.</p>
+                      )}
                     </div>
                   </div>
 
@@ -468,6 +559,9 @@ export function UsersPage({ users, setUsers, orders }) {
                     <div className="flex items-center gap-2">
                       <Heart className="h-4 w-4 text-gray-900" />
                       <p className="font-semibold">Wishlist</p>
+                      <span className="rounded-lg bg-primary px-3 py-1 text-sm font-semibold text-primary-foreground">
+                        {wishlist.length}
+                      </span>
                     </div>
                     <div className="mt-3 space-y-3">
                       {wishlistLoading ? (
@@ -509,10 +603,10 @@ export function UsersPage({ users, setUsers, orders }) {
               ) : (
                 <p className="text-sm text-muted-foreground">Select a user to view details.</p>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
