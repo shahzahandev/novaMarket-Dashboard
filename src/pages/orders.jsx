@@ -232,6 +232,7 @@ export function OrdersPage() {
                   <TableHead>Order Date</TableHead>
                   <TableHead>Total</TableHead>
                   <TableHead>Pay Method</TableHead>
+                  <TableHead>Pay status</TableHead>
                   <TableHead>Transac ID</TableHead>
                   <TableHead>Delivery Area</TableHead>
                   <TableHead>Status</TableHead>
@@ -247,7 +248,8 @@ export function OrdersPage() {
                     </TableCell>
                     <TableCell>{formatDate(order.createdAt)}</TableCell>
                     <TableCell>{formatCurrency(order.totalPrice)}</TableCell>
-                    <TableCell className="uppercase">{order.paymentMethod}</TableCell>
+                    <TableCell className="capitalize">{order.paymentMethod}</TableCell>
+                     <TableCell className="capitalize">{order.paymentStatus}</TableCell>
                     <TableCell>
                       {order.paymentMethod === "cod" ? "Not Available" : order.tranId}
                     </TableCell>
