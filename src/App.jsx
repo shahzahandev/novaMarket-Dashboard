@@ -10,16 +10,20 @@ import { UsersPage } from "@/pages/users";
 import { BannerPage } from "@/pages/banner";
 import { Wishlist } from "./pages/wishlist";
 import { DeliverySettings } from "@/pages/DeliverySettings";
-import  { WhatsApp } from "@/pages/whatsApp";
+import { WhatsApp } from "@/pages/whatsApp";
+import NoticeSettings from "@/pages/NoticeSettings";
+import { CartPage } from "@/pages/cart";
 
 const pageTitles = {
   dashboard: "Dashboard",
   banner: "Banner",
   deliverys: "Deliverys",
+  notice: "notice",
   whatsapp: "WhatsApp",
   products: "Products",
   users: "Users",
   wishlist: "Wishlist",
+  cart: "Cart",
   orders: "Orders",
   reports: "Reports",
   settings: "Settings",
@@ -73,20 +77,26 @@ export default function App() {
     if (activePage === "products") {
       return <ProductsPage products={products} setProducts={setProducts} />;
     }
-   if (activePage === "banner") {     
-    return <BannerPage />;
-  }
-   if (activePage === "deliverys") {     
-    return <DeliverySettings />;
-  }
-   if (activePage === "whatsapp") {     
-    return <WhatsApp />;
-  }
+    if (activePage === "banner") {
+      return <BannerPage />;
+    }
+    if (activePage === "deliverys") {
+      return <DeliverySettings />;
+    }
+    if (activePage === "notice") {
+      return <NoticeSettings />;
+    }
+    if (activePage === "whatsapp") {
+      return <WhatsApp />;
+    }
     if (activePage === "users") {
       return <UsersPage users={users} setUsers={setUsers} orders={orders} />;
     }
-    if(activePage === "wishlist"){
-      return <Wishlist />
+    if (activePage === "wishlist") {
+      return <Wishlist />;
+    }
+    if (activePage === "cart") {
+      return <CartPage />;
     }
     if (activePage === "orders") {
       return <OrdersPage orders={orders} setOrders={setOrders} />;
@@ -97,15 +107,7 @@ export default function App() {
     if (activePage === "settings") {
       return <SettingsPage />;
     }
-    return (
-      <DashboardPage
-        products={products}
-        users={users}
-        orders={orders}
-        chartData={chartData}
-        activity={activity}
-      />
-    );
+    return <DashboardPage />;
   }, [activePage, products, users, orders, chartData, activity]);
 
   return (

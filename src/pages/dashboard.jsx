@@ -1,76 +1,122 @@
-import {
-  AlertTriangle,
-  BadgeDollarSign,
-  Heart,
-  Package,
-  ShoppingBag,
-  TrendingUp,
-  Users,
-} from "lucide-react";
+import { AlertTriangle, BadgeDollarSign, Heart, Package, ShoppingBag, TrendingUp, Users } from "lucide-react";
 import { LiveSalesChart } from "@/components/live-sales-chart";
 import { MetricCard } from "@/components/metric-card";
 import { StatusBadge } from "@/components/status-badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 
 const API_BASE = "https://nova-market-backend-2.onrender.com/api/v1";
 const ALL_USERS_URL = `${API_BASE}/user/allUsers`;
 const ALL_PRODUCTS_URL = `${API_BASE}/product/allProduct`;
 const ALL_ORDER_URL = `${API_BASE}/order/allOrder`;
-const ALL_WISHLIST_URL = `${API_BASE}/wishlist/allWishlist`
+const ALL_WISHLIST_URL = `${API_BASE}/wishlist/allWishlist`;
 
-export function DashboardPage({ products, users, orders, chartData, }) {
+const CHART_DAYS = 7;       // koto din er chart
+const REFRESH_MS = 30000;   // 30 second por por order refresh
+
+// local date key: "2026-10-04"
+const dayKey = (date) => {
+  const d = new Date(date);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+
+export function DashboardPage() {
   const [userList, setUserList] = useState([]);
   const [productList, setProductList] = useState([]);
   const [orderList, setOrderList] = useState([]);
-  const [wishlist, setWishlist] = useState([])
-
-  const revenue = orderList
-    .filter((orderList) => orderList.status == "Delivered")
-    .reduce((sum, orderList) => sum + orderList.totalPrice, 0);
-
-  const lowStock = products.filter((product) => product.stock <= 8).length;
-  const delivered = orders.filter((order) => order.status === "Delivered").length;
+  const [wishlist, setWishlist] = useState([]);
 
   // All users
   useEffect(() => {
     async function fetchUsers() {
-      let data = await axios.get(ALL_USERS_URL);
+      const data = await axios.get(ALL_USERS_URL);
       setUserList(data.data.userData);
     }
-    fetchUsers()
+    fetchUsers();
   }, []);
 
-  // ALl Wishlist
+  // All wishlist
   useEffect(() => {
-    async function fetchUsers() {
-      let data = await axios.get(ALL_WISHLIST_URL);
+    async function fetchWishlist() {
+      const data = await axios.get(ALL_WISHLIST_URL);
       setWishlist(data.data.data);
     }
-    fetchUsers()
+    fetchWishlist();
   }, []);
 
-
-  // ALl Product
+  // All product
   useEffect(() => {
-    async function fetchUsers() {
-      let data = await axios.get(ALL_PRODUCTS_URL);
+    async function fetchProducts() {
+      const data = await axios.get(ALL_PRODUCTS_URL);
       setProductList(data.data.allProduct);
     }
-    fetchUsers()
+    fetchProducts();
   }, []);
 
-  // All order
+  // All order (live: 30s por por refresh)
   useEffect(() => {
-    async function fetchUsers() {
-      let data = await axios.get(ALL_ORDER_URL);
-      setOrderList(data.data.order);
+    let active = true;
+
+    async function fetchOrders() {
+      try {
+        const data = await axios.get(ALL_ORDER_URL);
+        if (active) setOrderList(data.data.order);
+      } catch (err) {
+        console.error("Order fetch failed", err);
+      }
     }
-    fetchUsers()
+
+    fetchOrders();
+    const interval = setInterval(fetchOrders, REFRESH_MS);
+
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
   }, []);
+
+  const deliveredOrders = useMemo(
+    () => orderList.filter((order) => order.status === "delivered"),
+    [orderList],
+  );
+
+  const revenue = useMemo(
+    () => deliveredOrders.reduce((sum, order) => sum + (order.subTotal || 0), 0),
+    [deliveredOrders],
+  );
+
+  const delivered = deliveredOrders.length;
+  const lowStock = productList.filter((product) => Number(product.stock) <= 8).length;
+
+  // Live sales chart data: last 7 din er delivered order theke
+  const chartData = useMemo(() => {
+    const days = [];
+    const today = new Date();
+
+    for (let i = CHART_DAYS - 1; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      days.push({
+        key: dayKey(d),
+        time: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+        sales: 0,
+        orders: 0,
+      });
+    }
+
+    deliveredOrders.forEach((order) => {
+      const entry = days.find((day) => day.key === dayKey(order.deliveredAt || order.createdAt));
+      if (entry) {
+        entry.sales += order.subTotal || 0;
+        entry.orders += 1;
+      }
+    });
+
+    return days.map(({ time, sales, orders }) => ({ time, sales, orders }));
+  }, [deliveredOrders]);
 
   return (
     <div className="space-y-6">
@@ -85,12 +131,12 @@ export function DashboardPage({ products, users, orders, chartData, }) {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-5">
         <MetricCard title="All Orders" value={orderList.length} note={`${delivered} delivered`} icon={ShoppingBag} tone="cyan" />
-        <MetricCard title="All Wishlists" value={wishlist.length} icon={Heart} />
         <MetricCard title="All Products" value={productList.length} note={`${lowStock} need attention`} icon={Package} tone="amber" />
         <MetricCard title="All Customers" value={userList.length} note="new leads" icon={Users} tone="indigo" />
-        <MetricCard title="Revenue" value={formatCurrency(revenue)} icon={BadgeDollarSign} tone="emerald" />
+        <MetricCard title="All Wishlists" value={wishlist.length} icon={Heart} />
+        <MetricCard title="Total Sell" value={formatCurrency(revenue)} icon={BadgeDollarSign} tone="emerald" />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.5fr_0.9fr]">
@@ -102,8 +148,12 @@ export function DashboardPage({ products, users, orders, chartData, }) {
           </CardHeader>
           <CardContent className="space-y-4">
             <PulseItem icon={AlertTriangle} title="Low stock alerts" value={lowStock} tone="text-amber-600" />
-            <PulseItem icon={ShoppingBag} title="Pending orders" value={orderList.filter((o) => o.status === "pending").length} tone="text-cyan-700" />
-            <PulseItem icon={TrendingUp} title="Conversion rate" value="7.8%" tone="text-emerald-600" />
+            <PulseItem
+              icon={ShoppingBag}
+              title="Pending orders"
+              value={orderList.filter((o) => o.status === "pending").length}
+              tone="text-cyan-700"
+            />
           </CardContent>
         </Card>
       </div>
@@ -117,6 +167,7 @@ export function DashboardPage({ products, users, orders, chartData, }) {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Order id</TableHead>
                 <TableHead>Customer</TableHead>
                 <TableHead>Order Date</TableHead>
                 <TableHead>Total</TableHead>
@@ -127,16 +178,19 @@ export function DashboardPage({ products, users, orders, chartData, }) {
             </TableHeader>
             <TableBody>
               {orderList.slice(0, 5).map((order) => (
+                
                 <TableRow key={order._id}>
+                  <TableCell> #{String(order._id).slice(-8).toUpperCase()}</TableCell>
+                   
                   <TableCell>
-                      <p className="font-medium">{order.shipping?.name}</p>
-                      <p className="text-xs text-muted-foreground">{order.shipping?.email}</p>
-                    </TableCell>   
-                    <TableCell>{formatDate(order.createdAt)}</TableCell>
+                    <p className="font-medium">{order.shipping?.name}</p>
+                    <p className="text-xs text-muted-foreground">{order.shipping?.email}</p>
+                  </TableCell>
+                  <TableCell>{formatDate(order.createdAt)}</TableCell>
                   <TableCell>{formatCurrency(order.totalPrice)}</TableCell>
                   <TableCell className="uppercase">{order.paymentMethod}</TableCell>
                   <TableCell className="capitalize">{order.deliveryArea} Dhaka</TableCell>
-                  <TableCell><StatusBadge status={order.status} /></TableCell>                 
+                  <TableCell><StatusBadge status={order.status} /></TableCell>
                 </TableRow>
               ))}
             </TableBody>

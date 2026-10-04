@@ -1,44 +1,117 @@
-import { BarChart3, Bell, Headphones, Heart, LayoutDashboard, LogOut, Menu, NotepadText, Package, Phone, Settings, ShoppingBag, Truck, Users, X } from "lucide-react";
+import {
+  BarChart3, Bell, ChevronDown, ClipboardList, Headphones, Heart, Image as ImageIcon,
+  LayoutDashboard, LogOut, Megaphone, Menu, Package, Phone, Settings,
+  ShoppingBag, ShoppingCart, SlidersHorizontal, Truck, Users, X,
+} from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },  
-  { id: "deliverys", label: "Delivery", icon: Truck },
-  { id: "banner", label: "banner", icon: NotepadText },
-  { id: "whatsapp", label: "Whatsapp", icon: Phone },
+  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  {
+    id: "update-settings",
+    label: "Update Settings",
+    icon: SlidersHorizontal,
+    children: [
+      { id: "banner", label: "Home Banner", icon: ImageIcon },
+      { id: "notice", label: "Notice Board", icon: Megaphone },
+      { id: "deliverys", label: "Delivery charge", icon: Truck },
+      { id: "whatsapp", label: "Whatsapp number", icon: Phone },
+    ],
+  },
+  {
+    id: "order-settings",
+    label: "Order Settings",
+    icon: ClipboardList,
+    children: [
+      { id: "orders", label: "Orders", icon: ShoppingBag },
+      { id: "wishlist", label: "Wishlist", icon: Heart },
+      { id: "cart", label: "Cart", icon: ShoppingCart },
+    ],
+  },
   { id: "products", label: "Products", icon: Package },
   { id: "users", label: "Users", icon: Users },
-  { id: "wishlist", label: "Wishlist", icon: Heart },
-  { id: "orders", label: "Orders", icon: ShoppingBag },
   { id: "reports", label: "Reports", icon: BarChart3 },
   { id: "settings", label: "Settings", icon: Settings },
 ];
 
 export function AdminLayout({ activePage, setActivePage, children }) {
   const [open, setOpen] = useState(false);
+  const [openGroups, setOpenGroups] = useState([]); // je dropdown gulo khola ache tar id
+
+  const toggleGroup = (id) =>
+    setOpenGroups((prev) =>
+      prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id],
+    );
+
+  const selectPage = (id) => {
+    setActivePage(id);
+    setOpen(false);
+  };
+
+  const itemClass = (active) =>
+    cn(
+      "flex h-10 w-full items-center gap-3 rounded-md px-3 text-left text-sm font-medium transition",
+      active
+        ? "bg-primary text-primary-foreground shadow-sm"
+        : "text-slate-700 hover:bg-accent hover:text-accent-foreground",
+    );
 
   const nav = (
     <nav className="space-y-1">
-      {navItems.map(({ id, label, icon: Icon }) => (
-        <button
-          key={id}
-          onClick={() => {
-            setActivePage(id);
-            setOpen(false);
-          }}
-          className={cn(
-            "flex h-10 w-full items-center gap-3 rounded-md px-3 text-left text-sm font-medium transition",
-            activePage === id
-              ? "bg-primary text-primary-foreground shadow-sm"
-              : "text-slate-700 hover:bg-accent hover:text-accent-foreground",
-          )}
-        >
-          <Icon className="h-4 w-4 shrink-0" />
-          {label}
-        </button>
-      ))}
+      {navItems.map((item) => {
+        const { id, label, icon: Icon, children: subItems } = item;
+
+        // Dropdown group
+        if (subItems) {
+          const childActive = subItems.some((c) => c.id === activePage);
+          const isOpen = openGroups.includes(id) || childActive;
+
+          return (
+            <div key={id}>
+              <button
+                onClick={() => toggleGroup(id)}
+                className={cn(
+                  "flex h-10 w-full items-center gap-3 rounded-md px-3 text-left text-sm font-medium transition",
+                  childActive
+                    ? "bg-accent text-accent-foreground"
+                    : "text-slate-700 hover:bg-accent hover:text-accent-foreground",
+                )}
+              >
+                <Icon className="h-4 w-4 shrink-0" />
+                <span className="flex-1">{label}</span>
+                <ChevronDown
+                  className={cn("h-4 w-4 shrink-0 transition-transform", isOpen && "rotate-180")}
+                />
+              </button>
+
+              {isOpen && (
+                <div className="ml-4 mt-1 space-y-1 border-l pl-3">
+                  {subItems.map(({ id: subId, label: subLabel, icon: SubIcon }) => (
+                    <button
+                      key={subId}
+                      onClick={() => selectPage(subId)}
+                      className={itemClass(activePage === subId)}
+                    >
+                      <SubIcon className="h-4 w-4 shrink-0" />
+                      {subLabel}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        }
+
+        // Normal item
+        return (
+          <button key={id} onClick={() => selectPage(id)} className={itemClass(activePage === id)}>
+            <Icon className="h-4 w-4 shrink-0" />
+            {label}
+          </button>
+        );
+      })}
     </nav>
   );
 
@@ -118,13 +191,6 @@ function Brand() {
 function SidebarFooter() {
   return (
     <div className="absolute bottom-5 left-4 right-4">
-      <div className="mb-3 rounded-lg border bg-muted/40 p-3 text-sm">
-        <p className="font-semibold">Today target</p>
-        <div className="mt-3 h-2 rounded-full bg-slate-200">
-          <div className="h-2 w-[72%] rounded-full bg-primary" />
-        </div>
-        <p className="mt-2 text-xs text-muted-foreground">72% completed</p>
-      </div>
       <Button variant="ghost" className="w-full justify-start text-rose-600">
         <LogOut className="h-4 w-4" />
         Logout

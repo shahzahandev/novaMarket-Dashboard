@@ -188,7 +188,7 @@ export function OrdersPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 xl:grid-cols-5">
         <MetricCard title="Pending" value={stats.pending} note="Need confirmation" icon={Clock} tone="amber" />
         <MetricCard title="Processing" value={stats.processing} note="Packing queue" icon={PackageCheck} tone="cyan" />
         <MetricCard title="Shipped" value={stats.shipped} note="Courier active" icon={Truck} tone="indigo" />

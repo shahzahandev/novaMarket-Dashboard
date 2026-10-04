@@ -9,11 +9,8 @@ import { formatCurrency } from "@/lib/utils";
 const API_BASE = "https://nova-market-backend-2.onrender.com/api/v1";
 const ALL_ORDERS_URL = `${API_BASE}/order/allOrder`;
 
-// Order ke kon date e count korbo.
-// Backend e deliveredAt nei, tai delivered order er updatedAt (status change er somoy) use hocche.
-// Order create er date dhorte chaile: order.createdAt
-const getReportDate = (order) => order.deliveredAt || order.updatedAt || order.createdAt || "";
 
+const getReportDate = (order) => order.deliveredAt || order.updatedAt || order.createdAt || "";
 const isDelivered = (order) => String(order.status || "").toLowerCase() === "delivered";
 
 const toMonthKey = (value) => {
@@ -148,8 +145,8 @@ export function ReportsPage() {
         </div>
       )}
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Summary title="Gross revenue" value={formatCurrency(report.revenue)} hint="Cart total of delivered orders" />
+      <div className="grid gap-4 grid-cols-3 md:grid-cols-3">
+        <Summary title="Total sell" value={formatCurrency(report.revenue)} hint="Cart total of delivered orders" />
         <Summary
           title="Average order"
           value={formatCurrency(report.average)}
