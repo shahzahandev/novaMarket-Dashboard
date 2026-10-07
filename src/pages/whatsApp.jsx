@@ -162,11 +162,11 @@ export function WhatsApp() {
         {/* ================= Create / Update form ================= */}
         <Card className="min-w-0">
           <CardHeader>
-            <CardTitle>{setting ? "Update WhatsApp Number" : "Create WhatsApp Number"}</CardTitle>
+            <CardTitle>{setting ? "Current WhatsApp Number" : "Create WhatsApp Number"}</CardTitle>
             <CardDescription>
               {setting
-                ? "Ei number ta storefront e WhatsApp contact hishebe use hoy."
-                : "Ekhono kono WhatsApp number add kora hoyni."}
+                ? "Current Number"
+                : "Not Avaiable."}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -199,7 +199,7 @@ export function WhatsApp() {
 
               <div className="space-y-2">
                 <label htmlFor="whatsapp-phone" className="text-sm font-medium">
-                  WhatsApp number
+                 Add New WhatsApp number
                 </label>
                 <Input
                   id="whatsapp-phone"
@@ -207,7 +207,7 @@ export function WhatsApp() {
                   value={phone}
                   onChange={(event) => setPhone(event.target.value)}
                 />
-                <p className="text-xs text-muted-foreground">Country code shoho number din, jemon 8801XXXXXXXXX.</p>
+                <p className="text-xs text-muted-foreground">Add a Bangladishi Number, Like 8801XXXXXXXXX.</p>
               </div>
 
               <div className="space-y-2">
