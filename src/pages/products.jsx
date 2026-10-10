@@ -1,7 +1,7 @@
-import { Edit3, Plus, Search, Trash2 } from "lucide-react";
+import { Edit3, Plus, Search, Settings, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { ProductDialog } from "@/components/product-dialog";
-import { CategoryDeleteDialog } from "@/components/category-delete-dialog";
+import { CategoryDialog } from "@/components/category-delete-dialog";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, } from "@/components/ui/card";
@@ -643,11 +643,9 @@ export function ProductsPage({
           </Button>
 
           <Button
-            variant="outline"
-            className="text-rose-600"
             onClick={handleOpenCategoryDialog} >
-            <Trash2 className="h-4 w-4" />
-            Delete Category
+              <Settings className="h-4 w-4" />
+             Category Settings
           </Button>
 
           <Button
@@ -953,11 +951,11 @@ export function ProductsPage({
         error={dialogError}
       />
 
-      {/* ======== Delete Category Dialog ======== */}
-      <CategoryDeleteDialog
-        open={categoryDialogOpen}
-        onClose={handleCloseCategoryDialog}
-      />
+   {/* ======== Category Dialog ======== */}
+<CategoryDialog
+  open={categoryDialogOpen}
+  onClose={handleCloseCategoryDialog}
+/>
     </div>
   );
 }

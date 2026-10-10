@@ -20,7 +20,9 @@ const navItems = [
       { id: "whatsapp", label: "Whatsapp number", icon: Phone },
     ],
   },
-  {
+
+  { id: "products", label: "Products", icon: Package },
+    {
     id: "order-settings",
     label: "Order Settings",
     icon: ClipboardList,
@@ -30,7 +32,6 @@ const navItems = [
       { id: "cart", label: "Cart", icon: ShoppingCart },
     ],
   },
-  { id: "products", label: "Products", icon: Package },
   { id: "users", label: "Users", icon: Users },
   { id: "reports", label: "Reports", icon: BarChart3 },
   { id: "settings", label: "Settings", icon: Settings },
