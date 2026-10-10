@@ -5,7 +5,7 @@ import { DashboardPage } from "@/pages/dashboard";
 import { OrdersPage } from "@/pages/orders";
 import { ProductsPage } from "@/pages/products";
 import { ReportsPage } from "@/pages/reports";
-import { SettingsPage } from "@/pages/settings";
+import { StoreInfo } from "./pages/settings";
 import { UsersPage } from "@/pages/users";
 import { BannerPage } from "@/pages/banner";
 import { Wishlist } from "./pages/wishlist";
@@ -105,7 +105,7 @@ export default function App() {
       return <ReportsPage products={products} orders={orders} />;
     }
     if (activePage === "settings") {
-      return <SettingsPage />;
+      return <StoreInfo />;
     }
     return <DashboardPage />;
   }, [activePage, products, users, orders, chartData, activity]);

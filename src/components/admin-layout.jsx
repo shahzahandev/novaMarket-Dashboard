@@ -6,6 +6,7 @@ import {
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useStoreInfo } from "@/context/StoreInfoContext";
 
 const navItems = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -22,7 +23,7 @@ const navItems = [
   },
 
   { id: "products", label: "Products", icon: Package },
-    {
+  {
     id: "order-settings",
     label: "Order Settings",
     icon: ClipboardList,
@@ -38,8 +39,13 @@ const navItems = [
 ];
 
 export function AdminLayout({ activePage, setActivePage, children }) {
+  const { storeInfo } = useStoreInfo();
+
   const [open, setOpen] = useState(false);
   const [openGroups, setOpenGroups] = useState([]); // je dropdown gulo khola ache tar id
+
+  const storeName = storeInfo?.storeName || "Store";
+  const storeEmail = storeInfo?.storeEmail || "";
 
   const toggleGroup = (id) =>
     setOpenGroups((prev) =>
@@ -52,8 +58,7 @@ export function AdminLayout({ activePage, setActivePage, children }) {
   };
 
   const itemClass = (active) =>
-    cn(
-      "flex h-10 w-full items-center gap-3 rounded-md px-3 text-left text-sm font-medium transition",
+    cn("flex h-10 w-full items-center gap-3 rounded-md px-3 text-left text-sm font-medium transition",
       active
         ? "bg-primary text-primary-foreground shadow-sm"
         : "text-slate-700 hover:bg-accent hover:text-accent-foreground",
@@ -151,7 +156,7 @@ export function AdminLayout({ activePage, setActivePage, children }) {
               <Menu className="h-5 w-5" />
             </Button>
             <div>
-              <h1 className="text-lg font-bold">Nova-Market Admin</h1>
+              <h1 className="text-lg font-bold">{storeName} Admin</h1>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -160,11 +165,11 @@ export function AdminLayout({ activePage, setActivePage, children }) {
             </Button>
             <div className="hidden items-center gap-3 rounded-md border bg-card px-3 py-2 md:flex">
               <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground">
-                E
+                {storeName.charAt(0).toUpperCase()}
               </div>
               <div>
                 <p className="text-sm font-semibold">Store Admin</p>
-                <p className="text-xs text-muted-foreground">novamarket@gmails.com</p>
+                <p className="text-xs text-muted-foreground">{storeEmail}</p>
               </div>
             </div>
           </div>
@@ -176,13 +181,16 @@ export function AdminLayout({ activePage, setActivePage, children }) {
 }
 
 function Brand() {
+  // Context theke direct nicche, tai props pass korte hobe na
+  const { storeInfo } = useStoreInfo();
+
   return (
     <div className="flex items-center gap-3">
       <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-950 text-white">
         <Headphones className="h-5 w-5" />
       </div>
       <div>
-        <p className="text-lg font-bold">Nova Market</p>
+        <p className="text-lg font-bold">{storeInfo?.storeName || "Store"}</p>
         <p className="text-xs text-muted-foreground">Admin control panel</p>
       </div>
     </div>

@@ -122,7 +122,6 @@ export function DashboardPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase text-primary">Nova-Market control room</p>
           <h2 className="mt-1 text-3xl font-bold tracking-normal">Dashboard</h2>
           <p className="mt-2 text-muted-foreground">Products, customers, orders, revenue and inventory at a glance.</p>
         </div>
