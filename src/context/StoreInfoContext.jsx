@@ -1,12 +1,28 @@
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import {
+    createContext,
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    useState,
+} from "react";
 
 const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
 const GET_URL = `${API_ORIGIN}/api/v1/store/getStoreInfo`;
 
 const StoreInfoContext = createContext(null);
 
+// Server kokhono kokhono JSON dey na (Render cold start / crash), tai safe parse
+const safeJson = async (response) => {
+    try {
+        return await response.json();
+    } catch {
+        return null;
+    }
+};
+
 export function StoreInfoProvider({ children }) {
-    const [storeInfo, setStoreInfo] = useState(null); // null = ekhono create hoyni
+    const [storeInfo, setStoreInfo] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
@@ -16,12 +32,14 @@ export function StoreInfoProvider({ children }) {
 
         try {
             const response = await fetch(GET_URL);
+
+            // DB clear thakle backend 404 dey -> eta error na, shudhu "not created"
             if (response.status === 404) {
                 setStoreInfo(null);
                 return;
             }
 
-            const data = await response.json();
+            const data = await safeJson(response);
 
             if (!response.ok) {
                 throw new Error(data?.message || "Failed to load store information.");
@@ -30,7 +48,7 @@ export function StoreInfoProvider({ children }) {
             setStoreInfo(data?.storeInfo || null);
         } catch (err) {
             console.error("Store info fetch error:", err);
-            setError(err.message || "Store information load kora jayni.");
+            setError(err.message || "Failed to load store information.");
         } finally {
             setLoading(false);
         }
@@ -40,13 +58,17 @@ export function StoreInfoProvider({ children }) {
         fetchStoreInfo();
     }, [fetchStoreInfo]);
 
-    const value = {
-        storeInfo,
-        setStoreInfo, // save-er por eta call korle sob jaygay instantly update hobe
-        loading,
-        error,
-        refetchStoreInfo: fetchStoreInfo,
-    };
+    const value = useMemo(
+        () => ({
+            storeInfo,
+            exists: Boolean(storeInfo),
+            setStoreInfo, // save-er por call korle puro app instantly update hobe
+            loading,
+            error,
+            refetchStoreInfo: fetchStoreInfo,
+        }),
+        [storeInfo, loading, error, fetchStoreInfo]
+    );
 
     return (
         <StoreInfoContext.Provider value={value}>
