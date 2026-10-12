@@ -1,6 +1,6 @@
 import {
   BarChart3, Bell, ChevronDown, ClipboardList, Headphones, Heart, Image as ImageIcon,
-  LayoutDashboard, LogOut, Megaphone, Menu, Package, Phone, Settings,
+  LayoutDashboard, LogOut, Megaphone, Menu, MessageCircle, Package, Phone, Settings,
   ShoppingBag, ShoppingCart, SlidersHorizontal, Truck, Users, X,
 } from "lucide-react";
 import { useState } from "react";
@@ -34,6 +34,7 @@ const navItems = [
     ],
   },
   { id: "users", label: "Users", icon: Users },
+  { id: "message", label: "Message", icon: MessageCircle},
   { id: "reports", label: "Reports", icon: BarChart3 },
   { id: "settings", label: "Settings", icon: Settings },
 ];

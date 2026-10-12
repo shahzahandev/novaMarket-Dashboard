@@ -145,7 +145,7 @@ export function ReportsPage() {
         </div>
       )}
 
-      <div className="grid gap-4 grid-cols-3 md:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
         <Summary title="Total sell" value={formatCurrency(report.revenue)} hint="Cart total of delivered orders" />
         <Summary
           title="Average order"

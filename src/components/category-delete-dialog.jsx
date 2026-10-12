@@ -1,26 +1,14 @@
-import {
-  Loader2,
-  Pencil,
-  Plus,
-  Trash2,
-  X,
-} from "lucide-react";
+import {Loader2, Pencil, Plus, Trash2, X, } from "lucide-react";
 import { useEffect, useState } from "react";
-
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, } from "@/components/ui/card";
 
 const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
 const API_BASE = `${API_ORIGIN}/api/v1/category`;
 const ALL_CATEGORIES_URL = `${API_BASE}/allCategory`;
 const CREATE_CATEGORY_URL = `${API_BASE}/createCategory`;
 const updateCategoryUrl = (id) => `${API_BASE}/updateCategory/${id}`;
-const deleteCategoryUrl = (id) => `${API_BASE}/deleteCategory/${id}`;
+
 
 const STATUS_STYLES = {
   active: "bg-emerald-50 text-emerald-700 border-emerald-200",
@@ -209,10 +197,7 @@ export default function CategoryManager() {
     return () => clearTimeout(timer);
   }, [notice]);
 
-  // ===================================================
   // Create
-  // ===================================================
-
   const handleCreate = async ({ name }) => {
     setSaving(true);
     setError("");
@@ -243,10 +228,7 @@ export default function CategoryManager() {
     }
   };
 
-  // ===================================================
   // Update (name / status)
-  // ===================================================
-
   const handleUpdate = async ({ name, status }) => {
     const target = editingCategory;
     if (!target) return;
@@ -287,35 +269,6 @@ export default function CategoryManager() {
       setEditingCategory(null);
     } finally {
       setSaving(false);
-    }
-  };
-
-  // Delete
-  const handleDelete = async (category) => {
-    const confirmed = window.confirm(
-      `Are you sure you want to delete "${category.name}"? This cannot be undone.`
-    );
-
-    if (!confirmed) return;
-    setError("");
-    setDeletingId(category._id);
-
-    try {
-      const response = await fetch(deleteCategoryUrl(category._id), {
-        method: "DELETE",
-      });
-
-      await parseResponse(response, "Failed to delete category");
-
-      setCategories((current) =>
-        current.filter((item) => item._id !== category._id)
-      );
-      setNotice("Category deleted successfully");
-    } catch (err) {
-      console.error("Category delete error:", err);
-      setError(err.message || "Category delete hoyni.");
-    } finally {
-      setDeletingId(null);
     }
   };
 
@@ -402,21 +355,6 @@ export default function CategoryManager() {
                             aria-label={`Edit ${category.name}`}
                           >
                             <Pencil className="h-4 w-4" />
-                          </Button>
-
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-rose-600"
-                            onClick={() => handleDelete(category)}
-                            disabled={deletingId === category._id}
-                            aria-label={`Delete ${category.name}`}
-                          >
-                            {deletingId === category._id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <Trash2 className="h-4 w-4" />
-                            )}
                           </Button>
                         </div>
                       </td>

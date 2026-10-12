@@ -13,6 +13,7 @@ import { DeliverySettings } from "@/pages/DeliverySettings";
 import { WhatsApp } from "@/pages/whatsApp";
 import NoticeSettings from "@/pages/NoticeSettings";
 import { CartPage } from "@/pages/cart";
+import ContactMessages from "./pages/ContactMessages";
 
 const pageTitles = {
   dashboard: "Dashboard",
@@ -25,6 +26,7 @@ const pageTitles = {
   wishlist: "Wishlist",
   cart: "Cart",
   orders: "Orders",
+  message: "Message",
   reports: "Reports",
   settings: "Settings",
 };
@@ -106,6 +108,9 @@ export default function App() {
     }
     if (activePage === "settings") {
       return <StoreInfo />;
+    }
+   if (activePage === "message") {
+      return <ContactMessages />;
     }
     return <DashboardPage />;
   }, [activePage, products, users, orders, chartData, activity]);

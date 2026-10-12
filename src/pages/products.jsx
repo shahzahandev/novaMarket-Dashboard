@@ -558,10 +558,7 @@ export function ProductsPage({
     setError("");
 
     try {
-      const response = await fetch(
-        deleteProductUrl(id),
-        { method: "DELETE", }
-      );
+      const response = await fetch(deleteProductUrl(id), { method: "DELETE", });
 
       const responseData = await response
         .json()

@@ -3,7 +3,13 @@ import { useEffect, useState } from "react";
 
 import { BannerDialog } from "@/components/banner-dialog";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle,} from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 // API
 const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
@@ -34,9 +40,39 @@ function imageSrc(image) {
   return "";
 }
 
+// Backend response -> banner state
+function mapBanner(bannerData) {
+  if (!bannerData || !Array.isArray(bannerData.images)) return null;
+
+  return {
+    id: bannerData._id,
+    eyebrow: bannerData.eyebrow || "",
+    headingFirst: bannerData.headingFirst || "",
+    headingSecond: bannerData.headingSecond || "",
+    paragraph: bannerData.paragraph || "",
+    buttonText: bannerData.buttonText || "",
+    images: bannerData.images,
+  };
+}
+
 // Build Banner FormData
-function buildBannerPayload({ images = [], removeImages = [] }) {
+function buildBannerPayload({
+  eyebrow = "",
+  headingFirst = "",
+  headingSecond = "",
+  paragraph = "",
+  buttonText = "",
+  images = [],
+  removeImages = [],
+}) {
   const payload = new FormData();
+
+  // Texts
+  payload.append("eyebrow", eyebrow);
+  payload.append("headingFirst", headingFirst);
+  payload.append("headingSecond", headingSecond);
+  payload.append("paragraph", paragraph);
+  payload.append("buttonText", buttonText);
 
   // New images
   images.forEach((file) => {
@@ -47,10 +83,7 @@ function buildBannerPayload({ images = [], removeImages = [] }) {
 
   // Removed Cloudinary public IDs
   if (removeImages.length > 0) {
-    payload.append(
-      "removeImages",
-      JSON.stringify(removeImages)
-    );
+    payload.append("removeImages", JSON.stringify(removeImages));
   }
 
   return payload;
@@ -77,23 +110,10 @@ export function BannerPage() {
       }
 
       const data = await response.json();
-      console.log("Hero slider API response:", data);
-      const bannerData = data?.data || null;
-
-      if (bannerData && Array.isArray(bannerData.images)) {
-        setBanner({
-          id: bannerData._id,
-          images: bannerData.images,
-        });
-      } else {
-        setBanner(null);
-      }
+      setBanner(mapBanner(data?.data));
     } catch (err) {
       console.error("Banner fetch error:", err);
-      setError(
-        err.message || "Banner load kora jayni."
-      );
-
+      setError(err.message || "Banner load kora jayni.");
       setBanner(null);
     } finally {
       setLoading(false);
@@ -105,8 +125,7 @@ export function BannerPage() {
     fetchBanner();
   }, []);
 
-  // Save Banner
-  // Add + Update
+  // Save Banner (Add + Update)
   const saveBanner = async (formValues) => {
     setSaving(true);
     setDialogError("");
@@ -114,46 +133,43 @@ export function BannerPage() {
 
     try {
       const payload = buildBannerPayload({
+        eyebrow: formValues?.eyebrow || "",
+        headingFirst: formValues?.headingFirst || "",
+        headingSecond: formValues?.headingSecond || "",
+        paragraph: formValues?.paragraph || "",
+        buttonText: formValues?.buttonText || "",
         images: formValues?.images || [],
         removeImages: formValues?.removeImages || [],
       });
 
-      const response = await fetch(
-        SAVE_HERO_SLIDER_URL,
-        {
-          method: "POST",
-          body: payload,
-        }
-      );
+      const response = await fetch(SAVE_HERO_SLIDER_URL, {
+        method: "POST",
+        body: payload,
+      });
 
-      const responseData = await response
-        .json()
-        .catch(() => null);
+      const responseData = await response.json().catch(() => null);
 
-      console.log("Save banner response:", responseData);
       if (!response.ok) {
-        const backendMessage =
+        throw new Error(
           responseData?.message ||
           responseData?.error ||
-          "Failed to save banner.";
-
-        throw new Error(backendMessage);
+          "Failed to save banner."
+        );
       }
+
       // Update immediately from API response
       if (responseData?.data) {
-        setBanner({
-          id: responseData.data._id,
-          images: responseData.data.images || [],
-        });
+        setBanner(mapBanner(responseData.data));
       }
+
       // Fetch latest data from backend
       await fetchBanner();
-      // Close dialog
+
       setDialogError("");
       setDialogOpen(false);
     } catch (err) {
-      console.error("Banner save error:",  err);
-      setDialogError( err.message || "Banner save hoyni."  );
+      console.error("Banner save error:", err);
+      setDialogError(err.message || "Banner save hoyni.");
       setDialogOpen(true);
     } finally {
       setSaving(false);
@@ -172,18 +188,26 @@ export function BannerPage() {
     setDialogError("");
   };
 
+  const hasText =
+    banner &&
+    (banner.eyebrow ||
+      banner.headingFirst ||
+      banner.headingSecond ||
+      banner.paragraph ||
+      banner.buttonText);
+
   // Render
   return (
     <div className="space-y-6">
-      {/* ========  Headern ========== */}
+      {/* Header */}
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-normal">
             Home Page Banner
           </h2>
           <p className="mt-2 text-muted-foreground">
-            Manage the hero section slider images shown
-            on the storefront.
+            Manage the hero section texts and slider images shown on the
+            storefront.
           </p>
         </div>
 
@@ -195,32 +219,70 @@ export function BannerPage() {
           >
             {loading ? "Loading..." : "Reload"}
           </Button>
-          <Button
-            onClick={openDialog}
-            disabled={saving}
-          >
+          <Button onClick={openDialog} disabled={saving}>
             <Edit3 className="h-4 w-4" />
             {banner ? "Update Banner" : "Add Banner"}
           </Button>
         </div>
       </div>
 
-      {/* ========= Page Error ========= */}
+      {/* Page Error */}
       {error && (
         <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
           {error}
         </div>
       )}
 
-      {/* ============= Current Banner Preview =========== */}
+      {/* Current Banner Text */}
       <Card>
         <CardHeader>
-          <CardTitle>
-            Current Banner Images
-          </CardTitle>
+          <CardTitle>Current Banner Text</CardTitle>
           <CardDescription>
-            {banner?.images?.length || 0}/6 images set
-            for the hero slider
+            Texts shown on the left side of the hero section
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="py-6 text-sm text-muted-foreground">
+              Loading banner text...
+            </div>
+          ) : hasText ? (
+            <div className="rounded-xl bg-neutral-900 p-6 text-white">
+              <p className="font-mono text-xs uppercase tracking-[0.2em] text-emerald-300">
+                {banner.eyebrow || "-"}
+              </p>
+
+              <h3 className="mt-3 text-2xl font-bold leading-tight sm:text-3xl">
+                <span className="block text-white">
+                  {banner.headingFirst || "-"}
+                </span>
+                <span className="block text-[#05acee]">
+                  {banner.headingSecond || "-"}
+                </span>
+              </h3>
+
+              <p className="mt-3 max-w-md text-sm text-white/60">
+                {banner.paragraph || "-"}
+              </p>
+
+              <span className="mt-4 inline-flex h-10 items-center rounded-full bg-emerald-400 px-5 text-sm font-semibold text-neutral-900">
+                {banner.buttonText || "-"}
+              </span>
+            </div>
+          ) : (
+            <p className="py-6 text-sm text-muted-foreground">
+              No banner text set yet.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Current Banner Images */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Current Banner Images</CardTitle>
+          <CardDescription>
+            {banner?.images?.length || 0}/6 images set for the hero slider
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -248,13 +310,8 @@ export function BannerPage() {
                         alt={`Banner ${index + 1}`}
                         className="h-full w-full object-cover"
                         onError={(event) => {
-                          console.error(
-                            "Banner image failed to load:",
-                            src
-                          );
-
-                          event.currentTarget.style.display =
-                            "none";
+                          console.error("Banner image failed to load:", src);
+                          event.currentTarget.style.display = "none";
                         }}
                       />
                     ) : (
@@ -269,15 +326,13 @@ export function BannerPage() {
           ) : (
             <div className="flex flex-col items-center gap-2 py-10 text-muted-foreground">
               <ImageOff className="h-8 w-8" />
-              <p className="text-sm">
-                No banner images set yet.
-              </p>
+              <p className="text-sm">No banner images set yet.</p>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* ========Banner Dialog ============ */}
+      {/* Banner Dialog */}
       <BannerDialog
         open={dialogOpen}
         banner={banner}
