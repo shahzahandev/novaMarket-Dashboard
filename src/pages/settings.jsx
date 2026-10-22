@@ -22,9 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useStoreInfo } from "@/context/StoreInfoContext";
-
-const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
-const API_BASE = `${API_ORIGIN}/api/v1`;
+import { API_BASE } from "@/lib/api";
 
 const CREATE_URL = `${API_BASE}/store/createStoreInfo`;
 const UPDATE_URL = `${API_BASE}/store/udateStoreInfo`;

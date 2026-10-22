@@ -3,18 +3,10 @@ import { useEffect, useState } from "react";
 
 import { BannerDialog } from "@/components/banner-dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { API_BASE, API_ORIGIN } from "@/lib/api";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, } from "@/components/ui/card";
 
 // API
-const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
-const API_BASE = `${API_ORIGIN}/api/v1`;
-
 const GET_HERO_SLIDER_URL = `${API_BASE}/banner/getHeroSlider`;
 const SAVE_HERO_SLIDER_URL = `${API_BASE}/banner/createHeroSlider`;
 

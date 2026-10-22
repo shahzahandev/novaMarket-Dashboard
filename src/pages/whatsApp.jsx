@@ -4,8 +4,8 @@ import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input, Select } from "@/components/ui/input";
+import { API_BASE } from "@/lib/api";
 
-const API_BASE = "https://nova-market-backend-2.onrender.com/api/v1";
 const CREATE_WHATSAPP_URL = `${API_BASE}/whatsapp/creatWhatsapp`;
 const GET_WHATSAPP_URL = `${API_BASE}/whatsapp/getWhatsapp`;
 const UPDATE_WHATSAPP_URL = `${API_BASE}/whatsapp/updateWhatsapp`;

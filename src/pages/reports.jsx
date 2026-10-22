@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/lib/utils";
+import { API_BASE } from "@/lib/api";
 
-const API_BASE = "https://nova-market-backend-2.onrender.com/api/v1";
 const ALL_ORDERS_URL = `${API_BASE}/order/allOrder`;
 
 

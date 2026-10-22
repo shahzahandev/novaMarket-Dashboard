@@ -8,9 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, } from "@/co
 import { Input, Select } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table";
 import { formatCurrency } from "@/lib/utils";
+import { API_BASE, API_ORIGIN } from "@/lib/api";
 
-const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
-const API_BASE = `${API_ORIGIN}/api/v1`;
 const ALL_PRODUCTS_URL = `${API_BASE}/product/allProduct`;
 const CREATE_PRODUCT_URL = `${API_BASE}/product/createProduct`;
 const updateProductUrl = (id) => `${API_BASE}/product/updateProduct/${id}`;

@@ -12,9 +12,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { API_BASE } from "@/lib/api";
 
-const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
-const SETTINGS_URL = `${API_ORIGIN}/api/v1/delivery/settings`;
+const SETTINGS_URL = `${API_BASE}/delivery/settings`;
 
 // Admin token tomar dashboard e jekhane rakho, shekhan theke nao
 const getAuthHeaders = () => {

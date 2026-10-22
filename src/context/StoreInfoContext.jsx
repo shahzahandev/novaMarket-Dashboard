@@ -6,9 +6,9 @@ import {
     useMemo,
     useState,
 } from "react";
+import { API_BASE } from "@/lib/api";
 
-const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
-const GET_URL = `${API_ORIGIN}/api/v1/store/getStoreInfo`;
+const GET_URL = `${API_BASE}/store/getStoreInfo`;
 
 const StoreInfoContext = createContext(null);
 

@@ -2,6 +2,7 @@ import { HeartOff, ImageOff } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { API_BASE } from "@/lib/api";
 import {
     Card,
     CardContent,
@@ -10,8 +11,6 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 
-const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
-const API_BASE = `${API_ORIGIN}/api/v1`;
 const ALL_WISHLIST_URL = `${API_BASE}/wishlist/allWishlist`;
 
 const formatPrice = (value) =>

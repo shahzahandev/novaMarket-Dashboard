@@ -2,12 +2,12 @@ import {Loader2, Pencil, Plus, Trash2, X, } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, } from "@/components/ui/card";
+import { API_BASE } from "@/lib/api";
 
-const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
-const API_BASE = `${API_ORIGIN}/api/v1/category`;
-const ALL_CATEGORIES_URL = `${API_BASE}/allCategory`;
-const CREATE_CATEGORY_URL = `${API_BASE}/createCategory`;
-const updateCategoryUrl = (id) => `${API_BASE}/updateCategory/${id}`;
+const CATEGORY_API_BASE = `${API_BASE}/category`;
+const ALL_CATEGORIES_URL = `${CATEGORY_API_BASE}/allCategory`;
+const CREATE_CATEGORY_URL = `${CATEGORY_API_BASE}/createCategory`;
+const updateCategoryUrl = (id) => `${CATEGORY_API_BASE}/updateCategory/${id}`;
 
 
 const STATUS_STYLES = {

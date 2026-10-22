@@ -5,10 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, } from "@/components/ui/card";
 import { Input, Select, Textarea, } from "@/components/ui/input";
 import { calculateDiscountPrice, } from "@/lib/discount";
+import { API_BASE, API_ORIGIN } from "@/lib/api";
 
 const MAX_IMAGES = 5;
-const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
-
 const SECTION_OPTIONS = ["none", "new", "deals", "feature"];
 
 const emptyProduct = {
@@ -132,7 +131,7 @@ export function ProductDialog({ open, product, onClose, onSave, saving = false }
       setCategoryLoading(true);
       setCategoryError("");
 
-      const response = await axios.get(`${API_ORIGIN}/api/v1/category/allActiveCategory`);
+      const response = await axios.get(`${API_BASE}/category/allActiveCategory`);
       if (response.data?.success) {
         const allCategory = response.data?.allActiveCategory || [];
         setCategories(allCategory);
@@ -279,7 +278,7 @@ export function ProductDialog({ open, product, onClose, onSave, saving = false }
       setCategoryCreating(true);
       setCategoryError("");
 
-      const response = await axios.post(`${API_ORIGIN}/api/v1/category/createCategory`, { name: categoryName, });
+      const response = await axios.post(`${API_BASE}/category/createCategory`, { name: categoryName, });
       if (!response.data?.success) {
         setCategoryError(response.data?.message || "Failed to create category.");
         return;
@@ -572,6 +571,69 @@ export function ProductDialog({ open, product, onClose, onSave, saving = false }
               onSubmit={submit}
               className="grid grid-cols-1 gap-5 sm:grid-cols-2"
             >
+
+              {/* PRODUCT IMAGES */}
+              <div className="sm:col-span-2">
+                <div className="mb-2 flex items-center justify-between">
+                  <label className="block text-sm font-medium">
+                    Product Images
+                  </label>
+                  <span className="text-xs text-muted-foreground">
+                    {totalImageCount}/{MAX_IMAGES}
+                  </span>
+                </div>
+
+                {existingImages.length > 0 && (
+                  <>
+                    <p className="mb-2 text-xs font-medium text-muted-foreground">
+                      Current images
+                    </p>
+                    <ImageGrid
+                      images={existingImages.map((image) => imageSrc(image))}
+                      mainKey={mainKey}
+                      getKey={(index) => existingImages[index]?._id || `existing-${index}`}
+                      onMain={(key) => setMainKey(key)}
+                      onRemove={removeExistingImage}
+                    />
+                  </>
+                )}
+
+                <label className="mt-3 flex h-32 w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed text-muted-foreground transition hover:border-primary hover:text-primary">
+                  <ImagePlus className="h-6 w-6" />
+                  <span className="text-sm">
+                    {totalImageCount >= MAX_IMAGES ? "Maximum images reached" : "Click to upload images"}
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    multiple
+                    onChange={addImages}
+                    disabled={totalImageCount >= MAX_IMAGES}
+                    className="hidden"
+                  />
+                </label>
+
+                {imageError && (
+                  <p className="mt-2 text-sm text-red-600">
+                    {imageError}
+                  </p>
+                )}
+
+                {newPreviews.length > 0 && (
+                  <>
+                    <p className="mb-2 mt-4 text-xs font-medium text-muted-foreground">
+                      New images
+                    </p>
+                    <ImageGrid
+                      images={newPreviews}
+                      mainKey={mainKey}
+                      getKey={(index) => `new-${index}`}
+                      onMain={(key) => setMainKey(key)}
+                      onRemove={removeNewImage}
+                    />
+                  </>
+                )}
+              </div>
 
               {/* TITLE */}
               <Field
@@ -945,77 +1007,6 @@ export function ProductDialog({ open, product, onClose, onSave, saving = false }
                     />
                   </Field>
                 </div>
-              </div>
-
-              {/* PRODUCT IMAGES */}
-              <div className="sm:col-span-2">
-                <div className="mb-2 flex items-center justify-between">
-                  <label className="block text-sm font-medium">
-                    Product Images
-                  </label>
-                  <span className="text-xs text-muted-foreground">
-                    {totalImageCount}
-                    {MAX_IMAGES}
-                  </span>
-                </div>
-
-                {/* EXISTING */}
-                {existingImages.length >
-                  0 && (
-                    <>
-                      <p className="mb-2 text-xs font-medium text-muted-foreground">
-                        Current images
-                      </p>
-
-                      <ImageGrid
-                        images={existingImages.map((image) => imageSrc(image))}
-                        mainKey={mainKey}
-                        getKey={(index) => existingImages[index]?._id || `existing-${index}`}
-                        onMain={(key) => setMainKey(key)}
-                        onRemove={removeExistingImage}
-                      />
-                    </>
-                  )}
-
-                {/* UPLOAD */}
-                <label className="mt-3 flex h-32 w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed text-muted-foreground transition hover:border-primary hover:text-primary">
-                  <ImagePlus className="h-6 w-6" />
-                  <span className="text-sm">
-                    {totalImageCount >= MAX_IMAGES ? "Maximum images reached" : "Click to upload images"}
-                  </span>
-
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    multiple
-                    onChange={addImages}
-                    disabled={totalImageCount >= MAX_IMAGES}
-                    className="hidden"
-                  />
-                </label>
-
-                {imageError && (
-                  <p className="mt-2 text-sm text-red-600">
-                    {imageError}
-                  </p>
-                )}
-
-                {/* NEW */}
-                {newPreviews.length >
-                  0 && (
-                    <>
-                      <p className="mb-2 mt-4 text-xs font-medium text-muted-foreground">
-                        New images
-                      </p>
-                      <ImageGrid
-                        images={newPreviews}
-                        mainKey={mainKey}
-                        getKey={(index) => `new-${index}`}
-                        onMain={(key) => setMainKey(key)}
-                        onRemove={removeNewImage}
-                      />
-                    </>
-                  )}
               </div>
 
               {/* ERROR */}

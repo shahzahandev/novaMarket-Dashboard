@@ -15,12 +15,12 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
+import { API_BASE } from "@/lib/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input, Select } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
-const API_BASE = "https://nova-market-backend-2.onrender.com/api/v1";
 const ALL_USERS_URL = `${API_BASE}/user/allUsers`;
 const ALL_DELETED_USERS_URL = `${API_BASE}/user/allDeleteUser`;
 const singleUserUrl = (id) => `${API_BASE}/user/singleUser/${id}`;

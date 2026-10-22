@@ -1,5 +1,6 @@
 import { ImagePlus, Save, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { API_ORIGIN } from "@/lib/api";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -11,8 +12,6 @@ import {
 
 const MAX_IMAGES = 6;
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
-
-const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
 
 const EMPTY_FORM = {
   eyebrow: "",

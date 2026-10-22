@@ -8,8 +8,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { CheckCircle2, Clock, PackageCheck, Truck } from "lucide-react";
 import axios from "axios";
+import { API_BASE } from "@/lib/api";
 
-const API_BASE = "https://nova-market-backend-2.onrender.com/api/v1";
 const ALL_ORDER_URL = `${API_BASE}/order/allOrder`;
 const UPDATE_STATUS_URL = (id) => `${API_BASE}/order/updateStatus/${id}`;
 

@@ -14,6 +14,7 @@ import { WhatsApp } from "@/pages/whatsApp";
 import NoticeSettings from "@/pages/NoticeSettings";
 import { CartPage } from "@/pages/cart";
 import ContactMessages from "./pages/ContactMessages";
+import { AdminLogin } from "@/pages/admin-login";
 
 const pageTitles = {
   dashboard: "Dashboard",
@@ -32,12 +33,20 @@ const pageTitles = {
 };
 
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(() =>
+    Boolean(sessionStorage.getItem("adminToken")),
+  );
   const [activePage, setActivePage] = useState("dashboard");
   const [products, setProducts] = useState(productsSeed);
   const [users, setUsers] = useState(usersSeed);
   const [orders, setOrders] = useState(ordersSeed);
   const [chartData, setChartData] = useState(salesSeed);
   const [activity, setActivity] = useState(activitySeed);
+
+  const handleLogout = () => {
+    sessionStorage.removeItem("adminToken");
+    setIsAuthenticated(false);
+  };
 
   useEffect(() => {
     document.title = `Nova Market ${pageTitles[activePage]}`;
@@ -116,8 +125,16 @@ export default function App() {
   }, [activePage, products, users, orders, chartData, activity]);
 
   return (
-    <AdminLayout activePage={activePage} setActivePage={setActivePage}>
-      {page}
-    </AdminLayout>
+    isAuthenticated ? (
+      <AdminLayout
+        activePage={activePage}
+        setActivePage={setActivePage}
+        onLogout={handleLogout}
+      >
+        {page}
+      </AdminLayout>
+    ) : (
+      <AdminLogin onLogin={() => setIsAuthenticated(true)} />
+    )
   );
 }

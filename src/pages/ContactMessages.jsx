@@ -1,27 +1,11 @@
-
 import { useEffect, useState } from "react";
 import axios from "axios";
-import {
-  Mail,
-  Phone,
-  MessageSquare,
-  Eye,
-  Trash2,
-  RefreshCw,
-  Search,
-  X,
-  Clock,
-} from "lucide-react";
+import { Phone, MessageSquare, Eye, Trash2, RefreshCw, Search, X } from "lucide-react";
+import { API_BASE } from "@/lib/api";
 
-const API_BASE = "https://nova-market-backend-2.onrender.com/api/v1/message";
+const MESSAGE_API_BASE = `${API_BASE}/message`;
 
-const STATUS_OPTIONS = [
-  "New",
-  "In Progress",
-  "Replied",
-  "Resolved",
-  "Spam",
-];
+const STATUS_OPTIONS = [ "New", "In Progress", "Replied", "Resolved", "Spam" ];
 
 const statusStyles = {
   New: "bg-blue-50 text-blue-700 border-blue-200",
@@ -54,31 +38,19 @@ const ContactMessages = () => {
     }
 
     try {
-      const response = await axios.get(`${API_BASE}/allMessage`);
-
+      const response = await axios.get(`${MESSAGE_API_BASE}/allMessage`);
       const data = response.data;
-
-      const messageList =
-        data.contactMessages ||
-        data.messages ||
-        data.allMessages ||
-        [];
+      const messageList = data.contactMessages || [];
 
       if (!Array.isArray(messageList)) {
-        throw new Error(
-          "Unexpected response format from the server."
-        );
+        throw new Error( "Unexpected response format from the server." );
       }
 
       setMessages(messageList);
     } catch (err) {
       console.error("Fetch messages error:", err);
 
-      setError(
-        err.response?.data?.message ||
-          err.message ||
-          "Failed to load contact messages."
-      );
+      setError(err.response?.data?.message || err.message || "Failed to load contact messages.");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -89,19 +61,16 @@ const ContactMessages = () => {
     fetchMessages();
   }, []);
 
+
+
   // GET SINGLE MESSAGE
   const handleViewMessage = async (id) => {
     setError("");
     setSuccess("");
 
     try {
-      const response = await axios.get(`${API_BASE}/singleMessage/${id}`);
-
-      const message =
-        response.data.contactMessage ||
-        response.data.messageData ||
-        response.data.data ||
-        response.data.message;
+      const response = await axios.get(`${MESSAGE_API_BASE}/singleMessage/${id}`);
+      const message = response.data.contactMessage 
 
       if (!message || typeof message !== "object") {
         throw new Error("Message details were not found.");
@@ -110,11 +79,7 @@ const ContactMessages = () => {
       setSelectedMessage(message);
     } catch (err) {
       console.error("Get single message error:", err);
-
-      setError(
-        err.response?.data?.message ||
-          "Failed to load message details."
-      );
+      setError( err.response?.data?.message || "Failed to load message details.");
     }
   };
 
@@ -125,20 +90,13 @@ const ContactMessages = () => {
     setUpdatingId(id);
 
     try {
-      const response = await axios.patch(
-        `${API_BASE}/update/${id}/status`,
-        { status }
-      );
+      const response = await axios.patch(`${MESSAGE_API_BASE}/update/${id}/status`, { status });
 
       if (response.data?.success === false) {
-        throw new Error(
-          response.data.message || "Status update failed."
-        );
+        throw new Error(response.data.message || "Status update failed.");
       }
 
-      const updatedMessage =
-        response.data.contactMessage ||
-        response.data.updatedMessage;
+      const updatedMessage = response.data.contactMessage || response.data.updatedMessage;
 
       setMessages((prev) =>
         prev.map((message) =>
@@ -153,8 +111,7 @@ const ContactMessages = () => {
       );
 
       setSelectedMessage((prev) =>
-        prev?._id === id
-          ? {
+        prev?._id === id ? {
               ...prev,
               status: updatedMessage?.status || status,
             }
@@ -165,11 +122,7 @@ const ContactMessages = () => {
     } catch (err) {
       console.error("Update status error:", err);
 
-      setError(
-        err.response?.data?.message ||
-          err.message ||
-          "Failed to update message status."
-      );
+      setError( err.response?.data?.message || err.message || "Failed to update message status.");
     } finally {
       setUpdatingId("");
     }
@@ -177,9 +130,7 @@ const ContactMessages = () => {
 
   // DELETE MESSAGE
   const handleDeleteMessage = async (id) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this message?"
-    );
+    const confirmed = window.confirm("Are you sure you want to delete this message?");
 
     if (!confirmed) return;
 
@@ -188,9 +139,7 @@ const ContactMessages = () => {
     setDeletingId(id);
 
     try {
-      const response = await axios.delete(
-        `${API_BASE}/delete/${id}`
-      );
+      const response = await axios.delete(`${MESSAGE_API_BASE}/delete/${id}`);
 
       if (response.data?.success === false) {
         throw new Error(
@@ -210,10 +159,7 @@ const ContactMessages = () => {
     } catch (err) {
       console.error("Delete message error:", err);
 
-      setError(
-        err.response?.data?.message ||
-          err.message ||
-          "Failed to delete message."
+      setError( err.response?.data?.message || err.message || "Failed to delete message."
       );
     } finally {
       setDeletingId("");
@@ -233,10 +179,7 @@ const ContactMessages = () => {
       String(value || "").toLowerCase().includes(searchText)
     );
 
-    const matchesStatus =
-      filterStatus === "All" ||
-      (message.status || "New") === filterStatus;
-
+    const matchesStatus = filterStatus === "All" || (message.status || "New") === filterStatus;
     return matchesSearch && matchesStatus;
   });
 

@@ -4,8 +4,8 @@ import { CalendarDays, Check, CornerLeftUpIcon, MessageSquare, MoveRight, Phone 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { API_BASE } from "@/lib/api";
 
-const API_BASE = "https://nova-market-backend-2.onrender.com/api/v1";
 const ALL_CART_URL = `${API_BASE}/cart/all`;
 
 const getImage = (product) =>

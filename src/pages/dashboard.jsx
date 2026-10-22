@@ -1,14 +1,15 @@
-import { AlertTriangle, BadgeDollarSign, Heart, Package, ShoppingBag, TrendingUp, Users } from "lucide-react";
+import { AlertTriangle, BadgeDollarSign, Heart, Package, RefreshCw, ShoppingBag, Users } from "lucide-react";
 import { LiveSalesChart } from "@/components/live-sales-chart";
 import { MetricCard } from "@/components/metric-card";
 import { StatusBadge } from "@/components/status-badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
+import { API_BASE } from "@/lib/api";
 
-const API_BASE = "https://nova-market-backend-2.onrender.com/api/v1";
 const ALL_USERS_URL = `${API_BASE}/user/allUsers`;
 const ALL_PRODUCTS_URL = `${API_BASE}/product/allProduct`;
 const ALL_ORDER_URL = `${API_BASE}/order/allOrder`;
@@ -28,6 +29,38 @@ export function DashboardPage() {
   const [productList, setProductList] = useState([]);
   const [orderList, setOrderList] = useState([]);
   const [wishlist, setWishlist] = useState([]);
+  const [reloading, setReloading] = useState(false);
+
+  const handleReloadApi = async () => {
+    setReloading(true);
+    const results = await Promise.allSettled([
+      axios.get(ALL_USERS_URL),
+      axios.get(ALL_PRODUCTS_URL),
+      axios.get(ALL_ORDER_URL),
+      axios.get(ALL_WISHLIST_URL),
+    ]);
+
+    const [usersResult, productsResult, ordersResult, wishlistResult] = results;
+    if (usersResult.status === "fulfilled") {
+      setUserList(usersResult.value.data.userData || []);
+    }
+    if (productsResult.status === "fulfilled") {
+      setProductList(productsResult.value.data.allProduct || []);
+    }
+    if (ordersResult.status === "fulfilled") {
+      setOrderList(ordersResult.value.data.order || []);
+    }
+    if (wishlistResult.status === "fulfilled") {
+      setWishlist(wishlistResult.value.data.data || []);
+    }
+
+    results.forEach((result, index) => {
+      if (result.status === "rejected") {
+        console.error(`Dashboard API ${index + 1} reload failed:`, result.reason);
+      }
+    });
+    setReloading(false);
+  };
 
   // All users
   useEffect(() => {
@@ -125,8 +158,14 @@ export function DashboardPage() {
           <h2 className="mt-1 text-3xl font-bold tracking-normal">Dashboard</h2>
           <p className="mt-2 text-muted-foreground">Products, customers, orders, revenue and inventory at a glance.</p>
         </div>
-        <div className="rounded-md border bg-card px-4 py-2 text-sm font-medium">
-          Live mode: <span className="text-emerald-600">Running</span>
+        <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
+          <div className="rounded-md border bg-card px-4 py-2 text-sm font-medium">
+            Live mode: <span className="text-emerald-600">Running</span>
+          </div>
+          <Button onClick={handleReloadApi} disabled={reloading} variant="outline">
+            <RefreshCw className={`h-4 w-4 ${reloading ? "animate-spin" : ""}`} />
+            {reloading ? "Reloading..." : "Reload API"}
+          </Button>
         </div>
       </div>
 

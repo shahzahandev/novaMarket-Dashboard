@@ -4,8 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-
-const API = "https://nova-market-backend-2.onrender.com";
+import { API_BASE } from "@/lib/api";
 
 const NoticeSettings = () => {
   const [text, setText] = useState("");
@@ -16,7 +15,7 @@ const NoticeSettings = () => {
   useEffect(() => {
     const fetchNotice = async () => {
       try {
-        const res = await fetch(`${API}/api/v1/notice/getNotice`);
+        const res = await fetch(`${API_BASE}/notice/getNotice`);
         const data = await res.json();
         if (data.notice) {
           setText(data.notice.text);
@@ -37,7 +36,7 @@ const NoticeSettings = () => {
     try {
       setLoading(true);
       setMessage("");
-      const res = await fetch(`${API}/api/v1/notice/saveNotice`, {
+      const res = await fetch(`${API_BASE}/notice/saveNotice`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         // auth token lagle: Authorization: `Bearer ${token}`
