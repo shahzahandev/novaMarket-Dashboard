@@ -1,5 +1,6 @@
-import { CircleX, Eye, Search, X, Share2, Check } from "lucide-react";
+import { CircleX, Eye, Search, X, Share2, Check, Printer } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { MetricCard } from "@/components/metric-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +10,7 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import { CheckCircle2, Clock, PackageCheck, Truck } from "lucide-react";
 import axios from "axios";
 import { useApiConfig } from "@/context/ApiContext";
+import { useStoreInfo } from "@/context/StoreInfoContext";
 
 // value = backend value (lowercase), label = UI te ja dekhabe
 const orderStatuses = [
@@ -21,6 +23,7 @@ const orderStatuses = [
 
 export function OrdersPage() {
   const { API_BASE } = useApiConfig();
+  const { storeInfo } = useStoreInfo();
   const ALL_ORDER_URL = `${API_BASE}/order/allOrder`;
   const UPDATE_STATUS_URL = (id) => `${API_BASE}/order/updateStatus/${id}`;
   const [orders, setOrders] = useState([]);
@@ -120,15 +123,28 @@ export function OrdersPage() {
   // Share order info
   // =========================
   const buildShareText = (order) => {
+    const shipping = order.shipping || {};
+    const shippingDetails = [
+      ["Name", shipping.name],
+      ["Phone", shipping.phone],
+      ["Email", shipping.email],
+      ["Address", shipping.address],
+      ["City", shipping.city],
+      ["Postcode", shipping.postcode],
+    ].filter(([, value]) => value != null && String(value).trim() !== "");
+
     const lines = [
-      `Order #${String(order._id).slice(-8).toUpperCase()}`,
+      storeInfo?.storeName || "Store",
+      storeInfo?.storeEmail || "",
+      storeInfo?.storeAddress || "",
+      "",
+      `INVOICE #${String(order._id).slice(-8).toUpperCase()}`,
       `Date: ${formatDate(order.createdAt)}`,
       `Status: ${order.status}`,
       "",
-      `Customer: ${order.shipping?.name}`,
-      `Phone: ${order.shipping?.phone}`,
-      `Email: ${order.shipping?.email}`,
-      `Address: ${order.shipping?.address}, ${order.shipping?.city} ${order.shipping?.postcode}`,
+      "Shipping details:",
+      ...shippingDetails.map(([label, value]) => `${label}: ${value}`),
+      ...(order.deliveryArea ? [`Delivery area: ${order.deliveryArea} Dhaka`] : []),
       "",
       "Products:",
       ...(order.products || []).map(
@@ -173,6 +189,8 @@ export function OrdersPage() {
       setError("Could not share or copy order info.");
     }
   };
+
+  const handlePrintInvoice = () => window.print();
 
   return (
     <div className="space-y-6">
@@ -294,76 +312,92 @@ export function OrdersPage() {
         </CardContent>
       </Card>
 
-      {/* =========================
-          Order Details Modal (static, share only)
-      ========================= */}
-      {selectedOrder && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      {/* Order details and printable invoice */}
+      {selectedOrder &&
+        createPortal(
+          <div
+          className="invoice-print-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
           onClick={() => setSelectedOrder(null)}
         >
           <div
-            className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-background p-6 shadow-xl"
+            id="order-invoice"
+            className="invoice-print-area max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl border bg-card p-6 text-card-foreground shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h3 className="text-xl font-bold">Order Details</h3>
-                <p className="text-xs text-muted-foreground">
-                  #{String(selectedOrder._id).slice(-8).toUpperCase()} · {formatDate(selectedOrder.createdAt)}
-                </p>
+            <div className="flex items-start justify-between gap-3 border-b pb-5">
+              <div className="min-w-0">
+                <p className="text-2xl font-bold text-primary">{storeInfo?.storeName || "Store"}</p>
+                {storeInfo?.storeEmail && <p className="mt-1 text-sm text-muted-foreground">{storeInfo.storeEmail}</p>}
+                {storeInfo?.storeAddress && <p className="mt-1 max-w-md whitespace-pre-line text-sm text-muted-foreground">{storeInfo.storeAddress}</p>}
               </div>
-              <Button variant="outline" size="icon" aria-label="Close" onClick={() => setSelectedOrder(null)}>
+              <div className="invoice-no-print flex shrink-0 items-center gap-2">
+                <Button variant="outline" size="icon" aria-label="Close" onClick={() => setSelectedOrder(null)}>
                 <X className="h-4 w-4" />
-              </Button>
+                </Button>
+              </div>
+            </div>
+
+            <div className="mt-5 flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h3 className="text-2xl font-bold">INVOICE</h3>
+                <p className="mt-1 text-sm text-muted-foreground">Order #{String(selectedOrder._id).slice(-8).toUpperCase()}</p>
+              </div>
+              <div className="text-sm sm:text-right">
+                <p><span className="text-muted-foreground">Invoice date:</span> {formatDate(selectedOrder.createdAt)}</p>
+                <p className="mt-1 capitalize"><span className="text-muted-foreground">Order status:</span> {selectedOrder.status}</p>
+              </div>
             </div>
 
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-xl border p-4 text-sm">
-                <p className="mb-2 font-semibold">Shipping</p>
+              <div className="rounded-xl border bg-background p-4 text-sm">
+                <p className="mb-2 font-semibold text-primary">Billed to</p>
                 <p>{selectedOrder.shipping?.name}</p>
                 <p className="text-muted-foreground">{selectedOrder.shipping?.phone}</p>
                 <p className="text-muted-foreground">{selectedOrder.shipping?.email}</p>
-                <p className="mt-2">
-                  {selectedOrder.shipping?.address}, {selectedOrder.shipping?.city}{" "}
-                  {selectedOrder.shipping?.postcode}
-                </p>
               </div>
 
-              <div className="rounded-xl border p-4 text-sm">
-                <p className="mb-2 font-semibold">Payment & Delivery</p>
-                <p>Method: <span className="uppercase">{selectedOrder.paymentMethod}</span></p>
-                <p>
-                  Transaction:{" "}
-                  {selectedOrder.paymentMethod === "cod" ? "Not Available" : selectedOrder.tranId}
-                </p>
-                <p className="capitalize">Area: {selectedOrder.deliveryArea} Dhaka</p>
-                <p className="mt-2 capitalize">
-                  Status: <span className="font-semibold">{selectedOrder.status}</span>
-                </p>
+              <div className="rounded-xl border bg-background p-4 text-sm">
+                <p className="mb-2 font-semibold text-primary">Shipping address</p>
+                <p>{selectedOrder.shipping?.name}</p>
+                <p>{selectedOrder.shipping?.address}</p>
+                <p>{[selectedOrder.shipping?.city, selectedOrder.shipping?.postcode].filter(Boolean).join(" ")}</p>
+                <p>{selectedOrder.shipping?.phone}</p>
               </div>
+
             </div>
 
             <div className="mt-4 rounded-xl border">
-              <p className="border-b px-4 py-3 text-sm font-semibold">
-                Products ({selectedOrder.products?.length || 0})
+              <p className="border-b bg-muted px-4 py-3 text-sm font-semibold">
+                Order items ({selectedOrder.products?.length || 0})
               </p>
-              <ul className="divide-y text-sm">
+              <div className="overflow-x-auto">
+              <table className="w-full min-w-[520px] text-left text-sm">
+                <thead className="border-b text-xs uppercase text-muted-foreground">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">Product</th>
+                    <th className="px-4 py-3 font-medium">Qty</th>
+                    <th className="px-4 py-3 text-right font-medium">Unit price</th>
+                    <th className="px-4 py-3 text-right font-medium">Amount</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
                 {(selectedOrder.products || []).map((item) => (
-                  <li key={item._id} className="flex items-center justify-between gap-3 px-4 py-3">
-                    <div>
+                  <tr key={item._id || `${item.title}-${item.sku}`}>
+                    <td className="px-4 py-3">
                       <p className="font-medium">{item.title}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {item.sku} · Qty {item.quantity} × {formatCurrency(item.discountPrice ?? item.price)}
-                      </p>
-                    </div>
-                    <span className="font-semibold">{formatCurrency(item.totalPrice)}</span>
-                  </li>
+                      {item.sku && <p className="mt-1 text-xs text-muted-foreground">SKU: {item.sku}</p>}
+                    </td>
+                    <td className="px-4 py-3">{item.quantity}</td>
+                    <td className="px-4 py-3 text-right">{formatCurrency(item.discountPrice ?? item.price)}</td>
+                    <td className="px-4 py-3 text-right font-semibold">{formatCurrency(item.totalPrice)}</td>
+                  </tr>
                 ))}
-              </ul>
+                </tbody>
+              </table>
+              </div>
             </div>
 
-            <div className="mt-4 space-y-1 text-sm">
+            <div className="mt-4 ml-auto max-w-sm space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Subtotal</span>
                 <span>{formatCurrency(selectedOrder.subTotal)}</span>
@@ -378,9 +412,21 @@ export function OrdersPage() {
               </div>
             </div>
 
-            <div className="mt-6 flex justify-end gap-3">
+            <div className="mt-5 grid gap-2 rounded-xl border bg-background p-4 text-sm sm:grid-cols-2">
+              <p>Payment method: <span className="font-medium uppercase">{selectedOrder.paymentMethod}</span></p>
+              <p>Payment status: <span className="font-medium capitalize">{selectedOrder.paymentStatus || "Not provided"}</span></p>
+              {selectedOrder.paymentMethod !== "cod" && selectedOrder.tranId && (
+                <p className="sm:col-span-2">Transaction ID: <span className="font-medium">{selectedOrder.tranId}</span></p>
+              )}
+              <p className="sm:col-span-2">Delivery area: <span className="font-medium capitalize">{selectedOrder.deliveryArea ? `${selectedOrder.deliveryArea} Dhaka` : "Not provided"}</span></p>
+            </div>
+
+            <div className="invoice-no-print mt-6 flex flex-wrap justify-end gap-3">
               <Button variant="outline" onClick={() => setSelectedOrder(null)}>
                 Close
+              </Button>
+              <Button variant="outline" onClick={handlePrintInvoice}>
+                <Printer className="mr-2 h-4 w-4" /> Print / PDF
               </Button>
               <Button onClick={() => handleShare(selectedOrder)}>
                 {copied ? (
@@ -395,8 +441,9 @@ export function OrdersPage() {
               </Button>
             </div>
           </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

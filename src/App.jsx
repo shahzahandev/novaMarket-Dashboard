@@ -38,6 +38,13 @@ const pageTitles = {
 };
 
 export default function App() {
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    try {
+      return localStorage.getItem("novaAdminTheme") === "dark";
+    } catch {
+      return false;
+    }
+  });
   const [isAuthenticated, setIsAuthenticated] = useState(() =>
     Boolean(sessionStorage.getItem("adminToken")),
   );
@@ -48,6 +55,15 @@ export default function App() {
   const [chartData, setChartData] = useState(salesSeed);
   const [activity, setActivity] = useState(activitySeed);
   const [authMessage, setAuthMessage] = useState("");
+
+  useLayoutEffect(() => {
+    document.documentElement.classList.toggle("dark", isDarkMode);
+    try {
+      localStorage.setItem("novaAdminTheme", isDarkMode ? "dark" : "light");
+    } catch {
+      // Keep the current theme for this session when storage is unavailable.
+    }
+  }, [isDarkMode]);
 
   useLayoutEffect(() => {
     const handleSessionExpired = () => {
@@ -167,6 +183,8 @@ export default function App() {
       activePage={activePage}
       setActivePage={setActivePage}
       onLogout={handleLogout}
+      isDarkMode={isDarkMode}
+      onToggleTheme={() => setIsDarkMode((current) => !current)}
     >
       {page}
     </AdminLayout>

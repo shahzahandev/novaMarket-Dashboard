@@ -22,6 +22,25 @@
     --radius: 0.5rem;
   }
 
+  .dark {
+    color-scheme: dark;
+    --background: 222 26% 9%;
+    --foreground: 210 30% 96%;
+    --card: 222 22% 13%;
+    --card-foreground: 210 30% 96%;
+    --muted: 217 19% 18%;
+    --muted-foreground: 215 16% 68%;
+    --accent: 217 22% 20%;
+    --accent-foreground: 188 75% 78%;
+    --primary: 188 80% 43%;
+    --primary-foreground: 222 35% 10%;
+    --destructive: 0 62% 48%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 217 18% 25%;
+    --input: 217 18% 25%;
+    --ring: 188 80% 52%;
+  }
+
   * {
     @apply border-border;
   }
@@ -45,4 +64,72 @@
   .scrollbar-thin {
     scrollbar-width: thin;
   }
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+
+  html,
+  body {
+    width: 100% !important;
+    margin: 0 !important;
+    background: #fff !important;
+  }
+
+  body > #root {
+    display: none !important;
+  }
+
+  body > .invoice-print-backdrop {
+    position: static !important;
+    inset: auto !important;
+    display: block !important;
+    width: 100% !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
+  #order-invoice {
+    position: static !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    overflow: visible !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #111827 !important;
+    box-shadow: none !important;
+  }
+
+  #order-invoice * {
+    color: inherit !important;
+    box-shadow: none !important;
+  }
+
+  #order-invoice .invoice-no-print {
+    display: none !important;
+  }
+}
+
+@layer utilities {
+  .dark .bg-white { background-color: hsl(var(--card)); }
+  .dark .bg-gray-50 { background-color: hsl(var(--muted)); }
+  .dark .bg-gray-100 { background-color: hsl(var(--background)); }
+  .dark .text-gray-900,
+  .dark .text-gray-800,
+  .dark .text-gray-700,
+  .dark .text-slate-700 { color: hsl(var(--foreground)); }
+  .dark .text-gray-600,
+  .dark .text-gray-500 { color: hsl(var(--muted-foreground)); }
+  .dark .border-gray-100,
+  .dark .border-gray-200,
+  .dark .border-gray-300 { border-color: hsl(var(--border)); }
+  .dark .hover\:bg-gray-50:hover,
+  .dark .hover\:bg-gray-100:hover,
+  .dark .hover\:bg-slate-100:hover { background-color: hsl(var(--accent)); }
 }

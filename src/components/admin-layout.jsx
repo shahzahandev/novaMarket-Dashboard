@@ -1,7 +1,7 @@
 import {
   BarChart3, Bell, ChevronDown, ClipboardList, Headphones, Heart, Image as ImageIcon,
   LayoutDashboard, LogOut, Megaphone, Menu, MessageCircle, Package, Phone, Settings,
-  ShoppingBag, ShoppingCart, SlidersHorizontal, Truck, Users, X, MessageSquare,
+  ShoppingBag, ShoppingCart, SlidersHorizontal, Truck, Users, X, MessageSquare, Moon, Sun,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
@@ -52,7 +52,7 @@ function readNotificationIds() {
   }
 }
 
-export function AdminLayout({ activePage, setActivePage, onLogout, children }) {
+export function AdminLayout({ activePage, setActivePage, onLogout, isDarkMode, onToggleTheme, children }) {
   const { storeInfo } = useStoreInfo();
   const { API_BASE } = useApiConfig();
 
@@ -287,6 +287,15 @@ export function AdminLayout({ activePage, setActivePage, onLogout, children }) {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={onToggleTheme}
+              aria-label={`Switch to ${isDarkMode ? "light" : "dark"} mode`}
+              title={`Switch to ${isDarkMode ? "light" : "dark"} mode`}
+            >
+              {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
             <div className="relative">
               <Button
                 variant="outline"

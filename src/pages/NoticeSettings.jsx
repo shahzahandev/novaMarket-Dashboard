@@ -71,7 +71,7 @@ const NoticeSettings = () => {
 
         <div className="flex items-center gap-3">
           <Switch checked={isActive} onCheckedChange={setIsActive} />
-          <Label>{isActive ? "Active (website e show hobe)" : "Inactive (hide thakbe)"}</Label>
+          <Label>{isActive ? "Active" : "Inactive"}</Label>
         </div>
 
         <Button onClick={handleSave} disabled={loading}>

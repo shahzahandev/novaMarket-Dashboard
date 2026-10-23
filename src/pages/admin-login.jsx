@@ -157,6 +157,12 @@ export function AdminLogin({ onLogin, notice }) {
           <ShieldCheck className="h-4 w-4 text-primary" />
           Secure admin access
         </div>
+     <div className="flex flex-col items-center">
+         <p className="font-bold">Visit with demo Email and Password</p>
+        <p>admin1234@gmail.com</p>
+        <p>admin1234@</p>
+     </div>
+
       </section>
     </main>
   );
