@@ -51,7 +51,7 @@ export function AdminLogin({ onLogin, notice }) {
       }
 
       sessionStorage.setItem("adminToken", token);
-      onLogin();
+      onLogin(formData.email.trim());
     } catch (err) {
       console.error("Admin Login Error:", err);
       setError(

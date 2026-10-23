@@ -48,6 +48,9 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() =>
     Boolean(sessionStorage.getItem("adminToken")),
   );
+  const [adminEmail, setAdminEmail] = useState(() =>
+    sessionStorage.getItem("adminEmail") || "",
+  );
   const [activePage, setActivePage] = useState("dashboard");
   const [products, setProducts] = useState(productsSeed);
   const [users, setUsers] = useState(usersSeed);
@@ -68,6 +71,7 @@ export default function App() {
   useLayoutEffect(() => {
     const handleSessionExpired = () => {
       setAuthMessage("Your session has expired. Please sign in again.");
+      setAdminEmail("");
       setIsAuthenticated(false);
     };
 
@@ -98,6 +102,8 @@ export default function App() {
 
   const handleLogout = () => {
     sessionStorage.removeItem("adminToken");
+    sessionStorage.removeItem("adminEmail");
+    setAdminEmail("");
     setAuthMessage("");
     setIsAuthenticated(false);
   };
@@ -185,13 +191,17 @@ export default function App() {
       onLogout={handleLogout}
       isDarkMode={isDarkMode}
       onToggleTheme={() => setIsDarkMode((current) => !current)}
+      adminEmail={adminEmail}
     >
       {page}
     </AdminLayout>
   ) : (
     <AdminLogin
       notice={authMessage}
-      onLogin={() => {
+      onLogin={(email) => {
+        const normalizedEmail = email.trim();
+        sessionStorage.setItem("adminEmail", normalizedEmail);
+        setAdminEmail(normalizedEmail);
         setAuthMessage("");
         setIsAuthenticated(true);
       }}

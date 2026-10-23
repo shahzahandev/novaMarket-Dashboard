@@ -2,6 +2,7 @@ import {
   BarChart3, Bell, ChevronDown, ClipboardList, Headphones, Heart, Image as ImageIcon,
   LayoutDashboard, LogOut, Megaphone, Menu, MessageCircle, Package, Phone, Settings,
   ShoppingBag, ShoppingCart, SlidersHorizontal, Truck, Users, X, MessageSquare, Moon, Sun,
+  ExternalLink,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
@@ -52,7 +53,7 @@ function readNotificationIds() {
   }
 }
 
-export function AdminLayout({ activePage, setActivePage, onLogout, isDarkMode, onToggleTheme, children }) {
+export function AdminLayout({ activePage, setActivePage, onLogout, isDarkMode, onToggleTheme, adminEmail, children }) {
   const { storeInfo } = useStoreInfo();
   const { API_BASE } = useApiConfig();
 
@@ -64,7 +65,7 @@ export function AdminLayout({ activePage, setActivePage, onLogout, isDarkMode, o
   const [ordersForNotifications, setOrdersForNotifications] = useState([]);
   const [messagesForNotifications, setMessagesForNotifications] = useState([]);
   const [readNotifications, setReadNotifications] = useState(readNotificationIds);
-  const storeName = storeInfo?.storeName || "Store";
+  const storeName = storeInfo?.storeName?.trim() || "Nova Market";
   const storeEmail = storeInfo?.storeEmail || "";
 
   useEffect(() => {
@@ -277,16 +278,32 @@ export function AdminLayout({ activePage, setActivePage, onLogout, isDarkMode, o
       </aside>
 
       <main className="lg:pl-72">
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b bg-background/90 px-4 backdrop-blur md:px-8">
+        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b bg-background/90 px-3 backdrop-blur sm:px-4 md:px-8">
           <div className="flex items-center gap-3">
             <Button variant="outline" size="icon" className="lg:hidden" onClick={() => setOpen(true)} aria-label="Open menu">
               <Menu className="h-5 w-5" />
             </Button>
             <div>
-              <h1 className="text-lg font-bold">{storeName} Admin</h1>
+              <div className="min-w-0">
+                <h1 className="max-w-[30vw] truncate text-lg font-bold leading-tight">{storeName} Admin</h1>
+                <p className="max-w-[30vw] truncate text-xs text-muted-foreground" title={adminEmail || "Admin email unavailable"}>
+                  {adminEmail || "Admin email unavailable"}
+                </p>
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+            <a
+              href="https://nova-market-frontend.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Open storefront in a new tab"
+              title="Visit Store"
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-md border border-input bg-card text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-auto sm:px-3"
+            >
+              <ExternalLink className="h-4 w-4" />
+              <span className="hidden sm:inline">Visit Store</span>
+            </a>
             <Button
               variant="outline"
               size="icon"
@@ -368,7 +385,7 @@ export function AdminLayout({ activePage, setActivePage, onLogout, isDarkMode, o
                 {storeName.charAt(0).toUpperCase()}
               </div>
               <div>
-                <p className="text-sm font-semibold">Store Admin</p>
+                <p className="max-w-40 truncate text-sm font-semibold" title={storeName}>{storeName}</p>
                 <p className="text-xs text-muted-foreground">{storeEmail}</p>
               </div>
             </div>

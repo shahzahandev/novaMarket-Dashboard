@@ -12,6 +12,7 @@ export function useApiConfig() {
 
 export function handleAdminUnauthorized() {
   sessionStorage.removeItem("adminToken");
+  sessionStorage.removeItem("adminEmail");
   window.dispatchEvent(new Event("admin-session-expired"));
 }
 
