@@ -1,17 +1,4 @@
-import {
-  Mail,
-  MapPin,
-  Phone,
-  RefreshCw,
-  Search,
-  Trash2,
-  UserCheck,
-  Heart,
-  PackageCheck,
-  Edit3,
-  Eye,
-  X,
-} from "lucide-react";
+import { Mail, MapPin, Phone, RefreshCw, Search, Trash2, UserCheck, Heart, PackageCheck, Edit3, Eye, X,} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
@@ -163,7 +150,6 @@ export function UsersPage({ users, setUsers }) {
     fetchUsers("active");
   }, []);
 
-  // Popup khola thakle Esc chaple bondho hobe + background scroll lock
   useEffect(() => {
     if (!detailsOpen) return;
 
@@ -333,21 +319,6 @@ export function UsersPage({ users, setUsers }) {
     }
   };
 
-  const removeUser = async (id) => {
-    setError("");
-
-    try {
-      const response = await adminFetch(deleteUserUrl(id), { method: "DELETE" });
-      if (!response.ok) throw new Error("Failed to delete user");
-
-      setUsers((current) => current.filter((user) => user.id !== id));
-      if (selectedUserId === id) closeDetails();
-    } catch (err) {
-      setError("User delete hoyni. Backend endpoint/auth/CORS check korte hobe.");
-      console.error(err);
-    }
-  };
-
   const changeMode = (mode) => {
     setViewMode(mode);
     setStatus(mode === "deleted" ? "Deleted" : "All");
@@ -376,15 +347,6 @@ export function UsersPage({ users, setUsers }) {
             aria-label="Edit user access"
           >
             <Edit3 className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-rose-600"
-            onClick={() => removeUser(user.id)}
-            aria-label="Delete user"
-          >
-            <Trash2 className="h-4 w-4" />
           </Button>
         </>
       )}
