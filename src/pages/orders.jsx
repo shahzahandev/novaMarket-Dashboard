@@ -8,10 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { CheckCircle2, Clock, PackageCheck, Truck } from "lucide-react";
 import axios from "axios";
-import { API_BASE } from "@/lib/api";
-
-const ALL_ORDER_URL = `${API_BASE}/order/allOrder`;
-const UPDATE_STATUS_URL = (id) => `${API_BASE}/order/updateStatus/${id}`;
+import { useApiConfig } from "@/context/ApiContext";
 
 // value = backend value (lowercase), label = UI te ja dekhabe
 const orderStatuses = [
@@ -23,6 +20,9 @@ const orderStatuses = [
 ];
 
 export function OrdersPage() {
+  const { API_BASE } = useApiConfig();
+  const ALL_ORDER_URL = `${API_BASE}/order/allOrder`;
+  const UPDATE_STATUS_URL = (id) => `${API_BASE}/order/updateStatus/${id}`;
   const [orders, setOrders] = useState([]);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");

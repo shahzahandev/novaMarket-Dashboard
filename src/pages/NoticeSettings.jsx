@@ -4,9 +4,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { API_BASE } from "@/lib/api";
+import { useApiConfig, adminFetch } from "@/context/ApiContext";
 
 const NoticeSettings = () => {
+  const { API_BASE } = useApiConfig();
   const [text, setText] = useState("");
   const [isActive, setIsActive] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -15,7 +16,7 @@ const NoticeSettings = () => {
   useEffect(() => {
     const fetchNotice = async () => {
       try {
-        const res = await fetch(`${API_BASE}/notice/getNotice`);
+        const res = await adminFetch(`${API_BASE}/notice/getNotice`);
         const data = await res.json();
         if (data.notice) {
           setText(data.notice.text);
@@ -36,7 +37,7 @@ const NoticeSettings = () => {
     try {
       setLoading(true);
       setMessage("");
-      const res = await fetch(`${API_BASE}/notice/saveNotice`, {
+      const res = await adminFetch(`${API_BASE}/notice/saveNotice`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         // auth token lagle: Authorization: `Bearer ${token}`

@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Phone, MessageSquare, Eye, Trash2, RefreshCw, Search, X } from "lucide-react";
-import { API_BASE } from "@/lib/api";
+import { useApiConfig } from "@/context/ApiContext";
 
-const MESSAGE_API_BASE = `${API_BASE}/message`;
 
 const STATUS_OPTIONS = [ "New", "In Progress", "Replied", "Resolved", "Spam" ];
 
@@ -16,6 +15,8 @@ const statusStyles = {
 };
 
 const ContactMessages = () => {
+  const { API_BASE } = useApiConfig();
+  const MESSAGE_API_BASE = `${API_BASE}/message`;
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);

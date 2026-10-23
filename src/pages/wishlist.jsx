@@ -2,7 +2,7 @@ import { HeartOff, ImageOff } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { API_BASE } from "@/lib/api";
+import { useApiConfig, adminFetch } from "@/context/ApiContext";
 import {
     Card,
     CardContent,
@@ -11,7 +11,6 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 
-const ALL_WISHLIST_URL = `${API_BASE}/wishlist/allWishlist`;
 
 const formatPrice = (value) =>
     typeof value === "number" ? `৳${value.toLocaleString("en-BD")}` : "—";
@@ -48,6 +47,8 @@ function ProductThumb({ src, alt }) {
 }
 
 export function Wishlist() {
+    const { API_BASE } = useApiConfig();
+    const ALL_WISHLIST_URL = `${API_BASE}/wishlist/allWishlist`;
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -57,7 +58,7 @@ export function Wishlist() {
         setError("");
 
         try {
-            const response = await fetch(ALL_WISHLIST_URL, {
+            const response = await adminFetch(ALL_WISHLIST_URL, {
                 headers: {},
             });
 

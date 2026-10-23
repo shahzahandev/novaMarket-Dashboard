@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, } from "@/components/ui/card";
 import { Input, Select, Textarea, } from "@/components/ui/input";
 import { calculateDiscountPrice, } from "@/lib/discount";
-import { API_BASE, API_ORIGIN } from "@/lib/api";
+import { useApiConfig } from "@/context/ApiContext";
 
 const MAX_IMAGES = 5;
 const SECTION_OPTIONS = ["none", "new", "deals", "feature"];
@@ -43,7 +43,7 @@ function toDateInputValue(value) {
 }
 
 // IMAGE URL
-function imageSrc(image) {
+function imageSrc(image, apiOrigin) {
   if (!image) return "";
 
   if (typeof image === "string") {
@@ -59,7 +59,7 @@ function imageSrc(image) {
 
   return url.startsWith("http")
     ? url
-    : `${API_ORIGIN}${url}`;
+    : `${apiOrigin}${url}`;
 }
 
 // DISCOUNT TYPE
@@ -107,6 +107,7 @@ function getDiscountValue(product) {
 
 // PRODUCT DIALOG
 export function ProductDialog({ open, product, onClose, onSave, saving = false }) {
+  const { API_BASE, API_ORIGIN } = useApiConfig();
   const [form, setForm] = useState(emptyProduct);
   const [specifications, setSpecifications] = useState([{ name: "", value: "", },]);
   const [newImages, setNewImages] = useState([]);
@@ -589,7 +590,7 @@ export function ProductDialog({ open, product, onClose, onSave, saving = false }
                       Current images
                     </p>
                     <ImageGrid
-                      images={existingImages.map((image) => imageSrc(image))}
+                        images={existingImages.map((image) => imageSrc(image, API_ORIGIN))}
                       mainKey={mainKey}
                       getKey={(index) => existingImages[index]?._id || `existing-${index}`}
                       onMain={(key) => setMainKey(key)}

@@ -6,9 +6,7 @@ import {
     useMemo,
     useState,
 } from "react";
-import { API_BASE } from "@/lib/api";
-
-const GET_URL = `${API_BASE}/store/getStoreInfo`;
+import { useApiConfig, adminFetch } from "@/context/ApiContext";
 
 const StoreInfoContext = createContext(null);
 
@@ -22,6 +20,8 @@ const safeJson = async (response) => {
 };
 
 export function StoreInfoProvider({ children }) {
+    const { API_BASE } = useApiConfig();
+    const GET_URL = `${API_BASE}/store/getStoreInfo`;
     const [storeInfo, setStoreInfo] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -31,7 +31,7 @@ export function StoreInfoProvider({ children }) {
         setError("");
 
         try {
-            const response = await fetch(GET_URL);
+            const response = await adminFetch(GET_URL);
 
             // DB clear thakle backend 404 dey -> eta error na, shudhu "not created"
             if (response.status === 404) {

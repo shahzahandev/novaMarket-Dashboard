@@ -2,9 +2,10 @@ import { useState } from "react";
 import axios from "axios";
 import { Eye, EyeOff, LockKeyhole, ShieldCheck } from "lucide-react";
 import { useStoreInfo } from "@/context/StoreInfoContext";
-import { API_BASE } from "@/lib/api";
+import { useApiConfig } from "@/context/ApiContext";
 
-export function AdminLogin({ onLogin }) {
+export function AdminLogin({ onLogin, notice }) {
+  const { API_BASE } = useApiConfig();
   const { storeInfo } = useStoreInfo();
   const storeName = storeInfo?.storeName?.trim() || "Nova Market";
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -87,6 +88,11 @@ export function AdminLogin({ onLogin }) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          {notice && (
+            <p role="status" className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+              {notice}
+            </p>
+          )}
           <div>
             <label htmlFor="email" className="mb-2 block text-sm font-medium">
               Email address

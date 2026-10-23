@@ -4,14 +4,14 @@ import { CalendarDays, Check, CornerLeftUpIcon, MessageSquare, MoveRight, Phone 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { API_BASE } from "@/lib/api";
-
-const ALL_CART_URL = `${API_BASE}/cart/all`;
+import { useApiConfig } from "@/context/ApiContext";
 
 const getImage = (product) =>
   product?.images?.find((img) => img.isMain)?.url || product?.images?.[0]?.url;
 
 export function CartPage() {
+  const { API_BASE } = useApiConfig();
+  const ALL_CART_URL = `${API_BASE}/cart/all`;
   const [carts, setCarts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

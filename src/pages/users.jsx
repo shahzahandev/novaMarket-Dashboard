@@ -15,35 +15,22 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
-import { API_BASE } from "@/lib/api";
+import { useApiConfig, adminFetch } from "@/context/ApiContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input, Select } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatCurrency, formatDate } from "@/lib/utils";
-
-const ALL_USERS_URL = `${API_BASE}/user/allUsers`;
-const ALL_DELETED_USERS_URL = `${API_BASE}/user/allDeleteUser`;
-const singleUserUrl = (id) => `${API_BASE}/user/singleUser/${id}`;
-const updateUserUrl = (id) => `${API_BASE}/user/updateUser/${id}`;
-const deleteUserUrl = (id) => `${API_BASE}/user/deleteUser/${id}`;
-const singleWishlistUrl = (id) => `${API_BASE}/wishlist/singleWishlist/${id}`;
-const singleUserOrdersUrl = (id) => `${API_BASE}/order/getSingleUserOrders/${id}`;
 
 function normalizeStatus(status) {
   const value = String(status || "active").toLowerCase();
 
   const statuses = {
     active: "Active",
+    inactive: "Inactive",
     delete: "Deleted",
     deleted: "Deleted",
   };
   return statuses[value] || "Active";
-}
-
-function backendStatus(status) {
-  const value = String(status || "Active").toLowerCase();
-  if (value === "deleted") return "delete";
-  return value;
 }
 
 function normalizeUser(user) {
@@ -113,6 +100,13 @@ function extractOrders(data) {
 }
 
 export function UsersPage({ users, setUsers }) {
+  const { API_BASE } = useApiConfig();
+  const ALL_USERS_URL = `${API_BASE}/user/allUsers`;
+  const ALL_DELETED_USERS_URL = `${API_BASE}/user/allDeleteUser`;
+  const singleUserUrl = (id) => `${API_BASE}/user/singleUser/${id}`;
+  const deleteUserUrl = (id) => `${API_BASE}/user/deleteUser/${id}`;
+  const singleWishlistUrl = (id) => `${API_BASE}/wishlist/singleWishlist/${id}`;
+  const singleUserOrdersUrl = (id) => `${API_BASE}/order/getSingleUserOrders/${id}`;
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
   const [selectedUserId, setSelectedUserId] = useState(null);
@@ -126,6 +120,12 @@ export function UsersPage({ users, setUsers }) {
   const [wishlistLoading, setWishlistLoading] = useState(false);
   const [userOrders, setUserOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+  const [editStatus, setEditStatus] = useState("active");
+  const [editIsHold, setEditIsHold] = useState(false);
+  const [editRole, setEditRole] = useState("user");
+  const [savingUserStatus, setSavingUserStatus] = useState(false);
+  const [editError, setEditError] = useState("");
 
   // User e click ba eye icon e click korle popup khulbe
   const selectUser = (id) => {
@@ -144,7 +144,7 @@ export function UsersPage({ users, setUsers }) {
     setError("");
 
     try {
-      const response = await fetch(mode === "deleted" ? ALL_DELETED_USERS_URL : ALL_USERS_URL);
+      const response = await adminFetch(mode === "deleted" ? ALL_DELETED_USERS_URL : ALL_USERS_URL);
       if (!response.ok) throw new Error("Failed to load users");
 
       const data = await response.json();
@@ -193,7 +193,7 @@ export function UsersPage({ users, setUsers }) {
       setDetailsLoading(true);
 
       try {
-        const response = await fetch(singleUserUrl(selectedUserId));
+        const response = await adminFetch(singleUserUrl(selectedUserId));
         if (!response.ok) throw new Error("Failed to load single user");
 
         const data = await response.json();
@@ -219,7 +219,7 @@ export function UsersPage({ users, setUsers }) {
       setWishlistLoading(true);
 
       try {
-        const response = await fetch(singleWishlistUrl(selectedUserId));
+        const response = await adminFetch(singleWishlistUrl(selectedUserId));
         if (!response.ok) throw new Error("Failed to load wishlist");
 
         const data = await response.json();
@@ -247,7 +247,7 @@ export function UsersPage({ users, setUsers }) {
       setOrdersLoading(true);
 
       try {
-        const response = await fetch(singleUserOrdersUrl(selectedUserId));
+        const response = await adminFetch(singleUserOrdersUrl(selectedUserId));
         if (!response.ok) throw new Error("Failed to load user orders");
 
         const data = await response.json();
@@ -276,29 +276,60 @@ export function UsersPage({ users, setUsers }) {
 
   const selected = selectedUser || users.find((user) => user.id === selectedUserId) || null;
 
-  const updateStatus = async (id, nextStatus) => {
-    setError("");
+  const openUserEditor = (user) => {
+    setEditingUser(user);
+    setEditStatus(user.status.toLowerCase() === "inactive" ? "inactive" : "active");
+    setEditIsHold(user.isHold);
+    const currentRole = String(user.raw?.role || user.role || "user").toLowerCase();
+    setEditRole(["admin", "user", "editor", "vendor"].includes(currentRole) ? currentRole : "user");
+    setEditError("");
+  };
 
+  const updateUserAccess = async (event) => {
+    event.preventDefault();
+    if (!editingUser) return;
+    setSavingUserStatus(true);
+    setEditError("");
     try {
-      const response = await fetch(updateUserUrl(id), {
-        method: "POST",
+      const response = await adminFetch(`${API_BASE}/user/admin/${editingUser.id}/status`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: backendStatus(nextStatus) }),
+        body: JSON.stringify({ status: editStatus, isHold: editIsHold, role: editRole }),
       });
-
-      if (!response.ok) throw new Error("Failed to update user");
-
-      setUsers((current) =>
-        current.map((user) => (user.id === id ? { ...user, status: normalizeStatus(nextStatus) } : user)),
-      );
-      if (selectedUserId === id) {
-        setSelectedUser((current) =>
-          current ? { ...current, status: normalizeStatus(nextStatus) } : current,
+      const responseText = await response.text();
+      let data = {};
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        data = {};
+      }
+      if (!response.ok || data.success === false) {
+        const plainText = responseText
+          .replace(/<[^>]*>/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+        throw new Error(
+          data.message ||
+            data.error ||
+            plainText ||
+            `User update failed (HTTP ${response.status}).`
         );
       }
+
+      const updatedUser = normalizeUser(data.user || {
+        ...editingUser.raw,
+        status: editStatus,
+        isHold: editIsHold,
+        role: editRole,
+      });
+      setUsers((current) => current.map((user) => user.id === editingUser.id ? updatedUser : user));
+      setSelectedUser((current) => current?.id === editingUser.id ? updatedUser : current);
+      setEditingUser(null);
     } catch (err) {
-      setError("User update hoyni. Backend endpoint/auth/CORS check korte hobe.");
-      console.error(err);
+      setEditError(err.message || "User access update failed.");
+      console.error("User access update failed:", err);
+    } finally {
+      setSavingUserStatus(false);
     }
   };
 
@@ -306,7 +337,7 @@ export function UsersPage({ users, setUsers }) {
     setError("");
 
     try {
-      const response = await fetch(deleteUserUrl(id), { method: "DELETE" });
+      const response = await adminFetch(deleteUserUrl(id), { method: "DELETE" });
       if (!response.ok) throw new Error("Failed to delete user");
 
       setUsers((current) => current.filter((user) => user.id !== id));
@@ -341,10 +372,10 @@ export function UsersPage({ users, setUsers }) {
           <Button
             variant="outline"
             size="icon"
-            onClick={() => updateStatus(user.id, user.status === "Active" ? "Suspended" : "Active")}
-            aria-label="Toggle user status"
+            onClick={() => openUserEditor(user)}
+            aria-label="Edit user access"
           >
-            {user.status === "Active" ? <Edit3 className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
+            <Edit3 className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
@@ -486,6 +517,93 @@ export function UsersPage({ users, setUsers }) {
           </div>
         </CardContent>
       </Card>
+
+      {editingUser && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4"
+          onClick={() => !savingUserStatus && setEditingUser(null)}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="edit-user-access-title"
+            className="w-full max-w-md rounded-xl border bg-card p-6 shadow-xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="mb-5 flex items-start justify-between gap-3">
+              <div>
+                <h3 id="edit-user-access-title" className="text-lg font-semibold">Edit user access</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{editingUser.name}</p>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => setEditingUser(null)}
+                disabled={savingUserStatus}
+                aria-label="Close user access editor"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <form onSubmit={updateUserAccess} className="space-y-5">
+              <label className="block space-y-2">
+                <span className="text-sm font-medium">User role</span>
+                <Select value={editRole} onChange={(event) => setEditRole(event.target.value)}>
+                  <option value="user">User</option>
+                  <option value="admin">Admin</option>
+                  <option value="editor">Editor</option>
+                  <option value="vendor">Vendor</option>
+                </Select>
+              </label>
+
+              <label className="block space-y-2">
+                <span className="text-sm font-medium">Account status</span>
+                <Select value={editStatus} onChange={(event) => setEditStatus(event.target.value)}>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </Select>
+              </label>
+
+              <label className="flex cursor-pointer items-center justify-between gap-3 rounded-md border p-3">
+                <span>
+                  <span className="block text-sm font-medium">Put account on hold</span>
+                  <span className="mt-1 block text-xs text-muted-foreground">
+                    Held accounts cannot access the store.
+                  </span>
+                </span>
+                <input
+                  type="checkbox"
+                  checked={editIsHold}
+                  onChange={(event) => setEditIsHold(event.target.checked)}
+                  className="h-4 w-4 accent-primary"
+                />
+              </label>
+
+              {editError && (
+                <p role="alert" className="rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+                  {editError}
+                </p>
+              )}
+
+              <div className="flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setEditingUser(null)}
+                  disabled={savingUserStatus}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={savingUserStatus}>
+                  {savingUserStatus ? "Updating..." : "Update user"}
+                </Button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
 
       {/* ================= User Details: popup ================= */}
       {detailsOpen && (

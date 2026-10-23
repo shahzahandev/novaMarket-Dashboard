@@ -22,10 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useStoreInfo } from "@/context/StoreInfoContext";
-import { API_BASE } from "@/lib/api";
-
-const CREATE_URL = `${API_BASE}/store/createStoreInfo`;
-const UPDATE_URL = `${API_BASE}/store/udateStoreInfo`;
+import { useApiConfig, adminFetch } from "@/context/ApiContext";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -81,6 +78,9 @@ const validateForm = (form) => {
 };
 
 export function StoreInfo() {
+  const { API_BASE } = useApiConfig();
+  const CREATE_URL = `${API_BASE}/store/createStoreInfo`;
+  const UPDATE_URL = `${API_BASE}/store/udateStoreInfo`;
   const {
     storeInfo,
     setStoreInfo,
@@ -191,7 +191,7 @@ export function StoreInfo() {
     setSaving(true);
 
     try {
-      const response = await fetch(exists ? UPDATE_URL : CREATE_URL, {
+      const response = await adminFetch(exists ? UPDATE_URL : CREATE_URL, {
         method: exists ? "PATCH" : "POST",
         headers: {
           "Content-Type": "application/json",

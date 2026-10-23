@@ -12,9 +12,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { API_BASE } from "@/lib/api";
+import { useApiConfig } from "@/context/ApiContext";
 
-const SETTINGS_URL = `${API_BASE}/delivery/settings`;
 
 // Admin token tomar dashboard e jekhane rakho, shekhan theke nao
 const getAuthHeaders = () => {
@@ -51,6 +50,8 @@ const settingsToForm = (s) => ({
 const isValidAmount = (v) => v !== "" && Number.isFinite(Number(v)) && Number(v) >= 0;
 
 export function DeliverySettings() {
+  const { API_BASE } = useApiConfig();
+  const SETTINGS_URL = `${API_BASE}/delivery/settings`;
   const [form, setForm] = useState(null);
   const [initial, setInitial] = useState("");
   const [freeAllActive, setFreeAllActive] = useState(false);

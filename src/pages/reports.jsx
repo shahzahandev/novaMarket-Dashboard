@@ -5,9 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/lib/utils";
-import { API_BASE } from "@/lib/api";
-
-const ALL_ORDERS_URL = `${API_BASE}/order/allOrder`;
+import { useApiConfig, adminFetch } from "@/context/ApiContext";
 
 
 const getReportDate = (order) => order.deliveredAt || order.updatedAt || order.createdAt || "";
@@ -30,13 +28,13 @@ const monthLabel = (key) => {
 const shorten = (text, max = 24) => (text.length > max ? `${text.slice(0, max - 1)}…` : text);
 
 // Backend paginated, tai sob page ekshathe niye ashchi
-async function fetchAllOrders() {
+async function fetchAllOrders(allOrdersUrl) {
   const all = [];
   let page = 1;
   let totalPages = 1;
 
   do {
-    const response = await fetch(`${ALL_ORDERS_URL}?page=${page}&limit=100`);
+    const response = await adminFetch(`${allOrdersUrl}?page=${page}&limit=100`);
     if (!response.ok) throw new Error("Failed to load orders");
 
     const data = await response.json();
@@ -51,6 +49,8 @@ async function fetchAllOrders() {
 }
 
 export function ReportsPage() {
+  const { API_BASE } = useApiConfig();
+  const ALL_ORDERS_URL = `${API_BASE}/order/allOrder`;
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -61,7 +61,7 @@ export function ReportsPage() {
     setError("");
 
     try {
-      setOrders(await fetchAllOrders());
+      setOrders(await fetchAllOrders(ALL_ORDERS_URL));
     } catch (err) {
       setError("Orders load kora jayni. Backend endpoint/CORS check korte hobe.");
       console.error(err);

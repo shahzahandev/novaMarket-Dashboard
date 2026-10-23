@@ -8,12 +8,7 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import { API_BASE } from "@/lib/api";
-
-const ALL_USERS_URL = `${API_BASE}/user/allUsers`;
-const ALL_PRODUCTS_URL = `${API_BASE}/product/allProduct`;
-const ALL_ORDER_URL = `${API_BASE}/order/allOrder`;
-const ALL_WISHLIST_URL = `${API_BASE}/wishlist/allWishlist`;
+import { useApiConfig } from "@/context/ApiContext";
 
 const CHART_DAYS = 7;       // koto din er chart
 const REFRESH_MS = 30000;   // 30 second por por order refresh
@@ -25,6 +20,11 @@ const dayKey = (date) => {
 };
 
 export function DashboardPage() {
+  const { API_BASE } = useApiConfig();
+  const ALL_USERS_URL = `${API_BASE}/user/allUsers`;
+  const ALL_PRODUCTS_URL = `${API_BASE}/product/allProduct`;
+  const ALL_ORDER_URL = `${API_BASE}/order/allOrder`;
+  const ALL_WISHLIST_URL = `${API_BASE}/wishlist/allWishlist`;
   const [userList, setUserList] = useState([]);
   const [productList, setProductList] = useState([]);
   const [orderList, setOrderList] = useState([]);

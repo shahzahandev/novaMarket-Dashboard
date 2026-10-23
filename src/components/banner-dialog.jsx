@@ -1,6 +1,6 @@
 import { ImagePlus, Save, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { API_ORIGIN } from "@/lib/api";
+import { useApiConfig } from "@/context/ApiContext";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -24,7 +24,7 @@ const EMPTY_FORM = {
 const INPUT_CLASS =
   "flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:cursor-not-allowed disabled:opacity-50";
 
-function imageSrc(image) {
+function imageSrc(image, apiOrigin) {
   if (!image) return "";
 
   // New Cloudinary object
@@ -39,7 +39,7 @@ function imageSrc(image) {
 
   // Old local image
   if (typeof image === "string") {
-    return `${API_ORIGIN}/upload/${image}`;
+    return `${apiOrigin}/upload/${image}`;
   }
 
   return "";
@@ -64,6 +64,7 @@ export function BannerDialog({
   saving = false,
   error = "",
 }) {
+  const { API_ORIGIN } = useApiConfig();
   const [form, setForm] = useState(EMPTY_FORM);
 
   const [existingImages, setExistingImages] = useState([]);
@@ -433,7 +434,7 @@ export function BannerDialog({
                         className="group relative overflow-hidden rounded-lg border bg-gray-50"
                       >
                         <img
-                          src={imageSrc(image)}
+                          src={imageSrc(image, API_ORIGIN)}
                           alt={`Banner ${index + 1}`}
                           className="aspect-video w-full object-cover"
                         />

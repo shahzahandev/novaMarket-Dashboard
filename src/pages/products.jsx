@@ -8,12 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, } from "@/co
 import { Input, Select } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table";
 import { formatCurrency } from "@/lib/utils";
-import { API_BASE, API_ORIGIN } from "@/lib/api";
-
-const ALL_PRODUCTS_URL = `${API_BASE}/product/allProduct`;
-const CREATE_PRODUCT_URL = `${API_BASE}/product/createProduct`;
-const updateProductUrl = (id) => `${API_BASE}/product/updateProduct/${id}`;
-const deleteProductUrl = (id) => `${API_BASE}/product/deleteProduct/${id}`;
+import { useApiConfig, adminFetch } from "@/context/ApiContext";
 
 // Normalize Status
 function normalizeStatus(status, stock) {
@@ -44,10 +39,10 @@ function normalizeStatus(status, stock) {
 }
 
 // Image From Product
-function imageFromProduct(product) {
+function imageFromProduct(product, apiOrigin) {
   if (typeof product.image === "string" && product.image.trim()) {
     const image = product.image.trim();
-    return image.startsWith("http") ? image : `${API_ORIGIN}${image}`;
+    return image.startsWith("http") ? image : `${apiOrigin}${image}`;
   }
 
   const images = Array.isArray(product.images) ? product.images : [];
@@ -58,7 +53,7 @@ function imageFromProduct(product) {
     return "";
   }
 
-  return imageUrl.startsWith("http") ? imageUrl : `${API_ORIGIN}${imageUrl}`;
+  return imageUrl.startsWith("http") ? imageUrl : `${apiOrigin}${imageUrl}`;
 }
 
 // Normalize Discount Type
@@ -119,7 +114,7 @@ function calculateDiscountValueFromPrice({
 }
 
 // Normalize Product
-function normalizeProduct(product) {
+function normalizeProduct(product, apiOrigin) {
   const stock = Number(product.stock ?? 0);
   const price = Number(product.price ?? 0);
   const discountType = normalizeDiscountType(product.discountType);
@@ -179,7 +174,7 @@ function normalizeProduct(product) {
     (image) => image.isMain
   );
 
-  const image = imageFromProduct(product);
+  const image = imageFromProduct(product, apiOrigin);
 
   return {
     id: product._id || product.id || `prd-${Date.now()}`,
@@ -410,6 +405,11 @@ export function ProductsPage({
   products,
   setProducts,
 }) {
+  const { API_BASE, API_ORIGIN } = useApiConfig();
+  const ALL_PRODUCTS_URL = `${API_BASE}/product/allProduct`;
+  const CREATE_PRODUCT_URL = `${API_BASE}/product/createProduct`;
+  const updateProductUrl = (id) => `${API_BASE}/product/updateProduct/${id}`;
+  const deleteProductUrl = (id) => `${API_BASE}/product/deleteProduct/${id}`;
   // States
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
@@ -432,7 +432,7 @@ export function ProductsPage({
     setError("");
 
     try {
-      const response = await fetch(ALL_PRODUCTS_URL);
+      const response = await adminFetch(ALL_PRODUCTS_URL);
       if (!response.ok) {
         throw new Error("Failed to load products");
       }
@@ -441,7 +441,7 @@ export function ProductsPage({
       const productList = data.allProduct || data.productData || data.data || [];
 
       setProducts(productList.map(
-        normalizeProduct
+        (product) => normalizeProduct(product, API_ORIGIN)
       )
       );
     } catch (err) {
@@ -503,7 +503,7 @@ export function ProductsPage({
       const isEditing = Boolean(editing);
       const url = isEditing ? updateProductUrl(product.id) : CREATE_PRODUCT_URL;
 
-      const response = await fetch(
+      const response = await adminFetch(
         url,
         {
           method: "POST",
@@ -557,7 +557,7 @@ export function ProductsPage({
     setError("");
 
     try {
-      const response = await fetch(deleteProductUrl(id), { method: "DELETE", });
+      const response = await adminFetch(deleteProductUrl(id), { method: "DELETE", });
 
       const responseData = await response
         .json()

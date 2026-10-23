@@ -4,11 +4,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input, Select } from "@/components/ui/input";
-import { API_BASE } from "@/lib/api";
-
-const CREATE_WHATSAPP_URL = `${API_BASE}/whatsapp/creatWhatsapp`;
-const GET_WHATSAPP_URL = `${API_BASE}/whatsapp/getWhatsapp`;
-const UPDATE_WHATSAPP_URL = `${API_BASE}/whatsapp/updateWhatsapp`;
+import { useApiConfig, adminFetch } from "@/context/ApiContext";
 
 function formatDateTime(value) {
   if (!value) return "—";
@@ -25,6 +21,10 @@ function formatDateTime(value) {
 }
 
 export function WhatsApp() {
+  const { API_BASE } = useApiConfig();
+  const CREATE_WHATSAPP_URL = `${API_BASE}/whatsapp/creatWhatsapp`;
+  const GET_WHATSAPP_URL = `${API_BASE}/whatsapp/getWhatsapp`;
+  const UPDATE_WHATSAPP_URL = `${API_BASE}/whatsapp/updateWhatsapp`;
   const [setting, setSetting] = useState(null); // null = ekhono create kora hoyni
   const [phone, setPhone] = useState("");
   const [isActive, setIsActive] = useState("Active");
@@ -44,7 +44,7 @@ export function WhatsApp() {
     setError("");
 
     try {
-      const response = await fetch(GET_WHATSAPP_URL);
+      const response = await adminFetch(GET_WHATSAPP_URL);
 
       // 404 mane ekhono kono number create kora hoyni, eta error na
       if (response.status === 404) {
@@ -85,7 +85,7 @@ export function WhatsApp() {
     setSaving(true);
 
     try {
-      const response = await fetch(setting ? UPDATE_WHATSAPP_URL : CREATE_WHATSAPP_URL, {
+      const response = await adminFetch(setting ? UPDATE_WHATSAPP_URL : CREATE_WHATSAPP_URL, {
         method: setting ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone: cleanPhone, isActive: isActive === "Active" }),

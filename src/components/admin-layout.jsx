@@ -7,7 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { API_BASE } from "@/lib/api";
+import { useApiConfig } from "@/context/ApiContext";
 import { useStoreInfo } from "@/context/StoreInfoContext";
 
 const navItems = [
@@ -54,6 +54,7 @@ function readNotificationIds() {
 
 export function AdminLayout({ activePage, setActivePage, onLogout, children }) {
   const { storeInfo } = useStoreInfo();
+  const { API_BASE } = useApiConfig();
 
   const [open, setOpen] = useState(false);
   const [openGroups, setOpenGroups] = useState([]);

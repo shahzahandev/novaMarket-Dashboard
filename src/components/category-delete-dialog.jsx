@@ -2,12 +2,7 @@ import {Loader2, Pencil, Plus, Trash2, X, } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, } from "@/components/ui/card";
-import { API_BASE } from "@/lib/api";
-
-const CATEGORY_API_BASE = `${API_BASE}/category`;
-const ALL_CATEGORIES_URL = `${CATEGORY_API_BASE}/allCategory`;
-const CREATE_CATEGORY_URL = `${CATEGORY_API_BASE}/createCategory`;
-const updateCategoryUrl = (id) => `${CATEGORY_API_BASE}/updateCategory/${id}`;
+import { useApiConfig, adminFetch } from "@/context/ApiContext";
 
 
 const STATUS_STYLES = {
@@ -160,6 +155,11 @@ function CategoryFormDialog({ mode, category, saving, onClose, onSubmit }) {
 // =====================================================
 
 export default function CategoryManager() {
+  const { API_BASE } = useApiConfig();
+  const CATEGORY_API_BASE = `${API_BASE}/category`;
+  const ALL_CATEGORIES_URL = `${CATEGORY_API_BASE}/allCategory`;
+  const CREATE_CATEGORY_URL = `${CATEGORY_API_BASE}/createCategory`;
+  const updateCategoryUrl = (id) => `${CATEGORY_API_BASE}/updateCategory/${id}`;
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -175,7 +175,7 @@ export default function CategoryManager() {
     setError("");
 
     try {
-      const response = await fetch(ALL_CATEGORIES_URL);
+      const response = await adminFetch(ALL_CATEGORIES_URL);
       const data = await parseResponse(response, "Failed to load categories");
       setCategories(data.allCategory || []);
     } catch (err) {
@@ -203,7 +203,7 @@ export default function CategoryManager() {
     setError("");
 
     try {
-      const response = await fetch(CREATE_CATEGORY_URL, {
+      const response = await adminFetch(CREATE_CATEGORY_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name }),
@@ -247,7 +247,7 @@ export default function CategoryManager() {
     setError("");
 
     try {
-      const response = await fetch(updateCategoryUrl(target._id), {
+      const response = await adminFetch(updateCategoryUrl(target._id), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

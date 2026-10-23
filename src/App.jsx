@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import axios from "axios";
 import { AdminLayout } from "@/components/admin-layout";
 import { activitySeed, ordersSeed, productsSeed, salesSeed, usersSeed } from "@/data/mock-data";
 import { DashboardPage } from "@/pages/dashboard";
@@ -15,6 +16,10 @@ import NoticeSettings from "@/pages/NoticeSettings";
 import { CartPage } from "@/pages/cart";
 import ContactMessages from "./pages/ContactMessages";
 import { AdminLogin } from "@/pages/admin-login";
+import { handleAdminUnauthorized } from "@/context/ApiContext";
+
+export const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
+export const API_BASE = `${API_ORIGIN}/api/v1`;
 
 const pageTitles = {
   dashboard: "Dashboard",
@@ -42,9 +47,42 @@ export default function App() {
   const [orders, setOrders] = useState(ordersSeed);
   const [chartData, setChartData] = useState(salesSeed);
   const [activity, setActivity] = useState(activitySeed);
+  const [authMessage, setAuthMessage] = useState("");
+
+  useLayoutEffect(() => {
+    const handleSessionExpired = () => {
+      setAuthMessage("Your session has expired. Please sign in again.");
+      setIsAuthenticated(false);
+    };
+
+    const requestInterceptor = axios.interceptors.request.use((config) => {
+      const token = sessionStorage.getItem("adminToken");
+      if (token && String(config.url || "").startsWith(API_BASE)) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    });
+    const responseInterceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401 && sessionStorage.getItem("adminToken")) {
+          handleAdminUnauthorized();
+        }
+        return Promise.reject(error);
+      },
+    );
+
+    window.addEventListener("admin-session-expired", handleSessionExpired);
+    return () => {
+      window.removeEventListener("admin-session-expired", handleSessionExpired);
+      axios.interceptors.request.eject(requestInterceptor);
+      axios.interceptors.response.eject(responseInterceptor);
+    };
+  }, []);
 
   const handleLogout = () => {
     sessionStorage.removeItem("adminToken");
+    setAuthMessage("");
     setIsAuthenticated(false);
   };
 
@@ -124,17 +162,21 @@ export default function App() {
     return <DashboardPage />;
   }, [activePage, products, users, orders, chartData, activity]);
 
-  return (
-    isAuthenticated ? (
-      <AdminLayout
-        activePage={activePage}
-        setActivePage={setActivePage}
-        onLogout={handleLogout}
-      >
-        {page}
-      </AdminLayout>
-    ) : (
-      <AdminLogin onLogin={() => setIsAuthenticated(true)} />
-    )
+  return isAuthenticated ? (
+    <AdminLayout
+      activePage={activePage}
+      setActivePage={setActivePage}
+      onLogout={handleLogout}
+    >
+      {page}
+    </AdminLayout>
+  ) : (
+    <AdminLogin
+      notice={authMessage}
+      onLogin={() => {
+        setAuthMessage("");
+        setIsAuthenticated(true);
+      }}
+    />
   );
 }

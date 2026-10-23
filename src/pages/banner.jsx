@@ -3,15 +3,11 @@ import { useEffect, useState } from "react";
 
 import { BannerDialog } from "@/components/banner-dialog";
 import { Button } from "@/components/ui/button";
-import { API_BASE, API_ORIGIN } from "@/lib/api";
+import { useApiConfig, adminFetch } from "@/context/ApiContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, } from "@/components/ui/card";
 
-// API
-const GET_HERO_SLIDER_URL = `${API_BASE}/banner/getHeroSlider`;
-const SAVE_HERO_SLIDER_URL = `${API_BASE}/banner/createHeroSlider`;
-
 // Image URL Helper
-function imageSrc(image) {
+function imageSrc(image, apiOrigin) {
   if (!image) return "";
   if (typeof image === "object" && image?.url) {
     return image.url;
@@ -26,7 +22,7 @@ function imageSrc(image) {
 
   // Old local filename support
   if (typeof image === "string") {
-    return `${API_ORIGIN}/upload/${image}`;
+    return `${apiOrigin}/upload/${image}`;
   }
 
   return "";
@@ -83,6 +79,9 @@ function buildBannerPayload({
 
 // Banner Page
 export function BannerPage() {
+  const { API_BASE, API_ORIGIN } = useApiConfig();
+  const GET_HERO_SLIDER_URL = `${API_BASE}/banner/getHeroSlider`;
+  const SAVE_HERO_SLIDER_URL = `${API_BASE}/banner/createHeroSlider`;
   const [banner, setBanner] = useState(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -95,7 +94,7 @@ export function BannerPage() {
     setLoading(true);
     setError("");
     try {
-      const response = await fetch(GET_HERO_SLIDER_URL);
+      const response = await adminFetch(GET_HERO_SLIDER_URL);
 
       if (!response.ok) {
         throw new Error("Failed to load banner.");
@@ -134,7 +133,7 @@ export function BannerPage() {
         removeImages: formValues?.removeImages || [],
       });
 
-      const response = await fetch(SAVE_HERO_SLIDER_URL, {
+      const response = await adminFetch(SAVE_HERO_SLIDER_URL, {
         method: "POST",
         body: payload,
       });
@@ -240,7 +239,7 @@ export function BannerPage() {
             </div>
           ) : hasText ? (
             <div className="rounded-xl bg-neutral-900 p-6 text-white">
-              <p className="font-mono text-xs uppercase tracking-[0.2em] text-emerald-300">
+              <p className="font-mono text-xs uppercase tracking-[0.2em] text-[#05acee]">
                 {banner.eyebrow || "-"}
               </p>
 
@@ -257,7 +256,7 @@ export function BannerPage() {
                 {banner.paragraph || "-"}
               </p>
 
-              <span className="mt-4 inline-flex h-10 items-center rounded-full bg-emerald-400 px-5 text-sm font-semibold text-neutral-900">
+              <span className="mt-4 inline-flex h-10 items-center rounded-full bg-[#05acee] px-5 text-sm font-semibold text-neutral-900">
                 {banner.buttonText || "-"}
               </span>
             </div>
@@ -285,7 +284,7 @@ export function BannerPage() {
           ) : banner?.images?.length ? (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-6">
               {banner.images.map((image, index) => {
-                const src = imageSrc(image);
+                const src = imageSrc(image, API_ORIGIN);
 
                 return (
                   <div
